@@ -1,0 +1,20 @@
+Home, Profile, Projects, Preview, Map
+
+Home
+(dashboard for the following)
+- Home
+- Profile
+- Projects
+  - Project
+    (bottom tab for 3)
+    - Preview (named Project)
+        retreieve from API
+    - Map (display locations, and whether they are visited)
+        constantly check user location (subscribe), and if within a location (100m)
+        send API request to mark as visited
+    - QR code scanner (sends API request to mark location as visited)
+- About
+
+(buttons for the following)
+- Profile
+- Projects
