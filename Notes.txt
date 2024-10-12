@@ -18,3 +18,7 @@ Home
 (buttons for the following)
 - Profile
 - Projects
+
+
+react-native-maps@1.18.0 - expected version: 1.14.0
+  typescript@5.6.3 - expected version: ~5.3.3
