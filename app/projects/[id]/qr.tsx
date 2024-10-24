@@ -1,11 +1,11 @@
 import { SafeAreaView, Text } from "react-native";
 
-export default function ProfileScreen() {
+export default function QRScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      <Text>Profile Screen</Text>
+      <Text>QR Code Scanner Screen</Text>
     </SafeAreaView>
   );
 }

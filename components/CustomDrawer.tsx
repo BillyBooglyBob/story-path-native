@@ -3,29 +3,27 @@ import {
   DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
-import { View, Image, Text } from "react-native";
+import { View, Image, Text, SafeAreaView } from "react-native";
 
 const CustomDrawer = (props: any) => {
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1f1e26' }}>
       <DrawerContentScrollView
         {...props}
         scrollEnabled={false}
-        contentContainerStyle={{ backgroundColor: "#1f1e26" }}
+        contentContainerStyle={{ flexGrow: 1 }} // Ensure the content takes up all available space
       >
-        <View>
+        <View style={{ alignItems: 'center' }}>
           <Image
             source={require("../assets/icon.png")}
             style={{
               width: 150,
               height: 150,
-              alignSelf: "center",
               marginTop: 20,
             }}
           />
           <Text
             style={{
-              alignSelf: "center",
               fontWeight: "500",
               fontSize: 18,
               paddingTop: 10,
@@ -36,12 +34,12 @@ const CustomDrawer = (props: any) => {
             Story Path
           </Text>
         </View>
-        <View style={{backgroundColor: 'white'}}>
+        <View style={{ backgroundColor: 'white', flex: 1 }}>
           <DrawerItemList {...props} />
           <DrawerItem label={"Logout"} onPress={() => console.log("first")} />
         </View>
       </DrawerContentScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

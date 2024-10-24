@@ -1,14 +1,14 @@
 import { Link } from "expo-router";
 import { SafeAreaView, Text } from "react-native";
 
-export default function HomeScreen() {
+export default function ProjectsScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      <Text>Home Screen</Text>
-      <Link href="/profile">Go to Profile</Link>
-      <Link href="/projects">Go to Projects</Link>
+      <Text>Projects List</Text>
+      <Link href="/projects/1">View Project 1</Link>
+      <Link href="/projects/2">View Project 2</Link>
     </SafeAreaView>
   );
 }
