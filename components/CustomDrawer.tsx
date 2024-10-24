@@ -4,22 +4,30 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { View, Image, Text, SafeAreaView } from "react-native";
+import { useUser } from "../UserContext";
 
 const CustomDrawer = (props: any) => {
+  const { userState } = useUser();
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#1f1e26' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <DrawerContentScrollView
         {...props}
         scrollEnabled={false}
         contentContainerStyle={{ flexGrow: 1 }} // Ensure the content takes up all available space
       >
-        <View style={{ alignItems: 'center' }}>
+        <View style={{ alignItems: "center" }}>
           <Image
-            source={require("../assets/icon.png")}
+            source={
+              userState.uri
+                ? { uri: userState.uri }
+                : require("../assets/user.png") // Default image
+            }
             style={{
               width: 150,
               height: 150,
               marginTop: 20,
+              borderRadius: 75,
             }}
           />
           <Text
@@ -28,15 +36,14 @@ const CustomDrawer = (props: any) => {
               fontSize: 18,
               paddingTop: 10,
               paddingBottom: 10,
-              color: "white",
+              color: "black",
             }}
           >
-            Story Path
+            {userState.username}
           </Text>
         </View>
-        <View style={{ backgroundColor: 'white', flex: 1 }}>
+        <View style={{ backgroundColor: "white", flex: 1 }}>
           <DrawerItemList {...props} />
-          <DrawerItem label={"Logout"} onPress={() => console.log("first")} />
         </View>
       </DrawerContentScrollView>
     </SafeAreaView>
