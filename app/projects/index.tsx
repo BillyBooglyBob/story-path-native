@@ -2,11 +2,14 @@ import { Link } from "expo-router";
 import { SafeAreaView, Text, StyleSheet, View } from "react-native";
 import { useUser } from "../../UserContext";
 import { getProjectParticipantsCount, getProjects } from "../../lib/util";
-import { Project, ProjectParticipantsCount } from "../../lib/types";
+import { Project } from "../../lib/types";
 import { useQueries, useQuery } from "@tanstack/react-query";
 
 export default function ProjectsScreen() {
+  // Get username
   const { userState } = useUser();
+
+  // Get all projects
   const {
     status,
     error,
@@ -16,6 +19,7 @@ export default function ProjectsScreen() {
     queryFn: getProjects,
   });
 
+  // Get the number of participants for each project
   const participantQueries = useQueries({
     queries: (projects || []).map((project) => ({
       queryKey: ["participants", project.id],
@@ -32,6 +36,9 @@ export default function ProjectsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {projects?.map((project, index) => {
+        // Ensure unpublished projects are not shown
+        if (!project.is_published) return null;
+
         const participantQuery = participantQueries[index];
         const participantsCount =
           participantQuery?.data?.[0]?.number_participants || "0";
