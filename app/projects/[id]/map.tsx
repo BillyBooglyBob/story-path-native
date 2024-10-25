@@ -3,6 +3,8 @@ import { SafeAreaView, Text, StyleSheet, View } from "react-native";
 import { getLocations } from "../../../lib/util";
 import { useQuery } from "@tanstack/react-query";
 import { ProjectLocation } from "../../../lib/types";
+// import ShowMap from "../../../components/locationMap/ShowMap";
+import ShowMap2 from "../../../components/locationMap/test";
 
 export default function MapScreen() {
   // Get all locations for the current project and display them on the map
@@ -18,19 +20,12 @@ export default function MapScreen() {
     queryFn: () => getLocations(Number(projectId)),
   });
 
-  return (
-    <SafeAreaView
-      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-    >
-      <Text>Map Screen</Text>
-      {locations?.map((location) => (
-        <View key={location.id}>
-          <Text>Location name: {location.location_name}</Text>
-          <Text>Location coordinate: {location.location_position}</Text>
-        </View>
-      ))}
-    </SafeAreaView>
-  );
+  // console.log("locations", locations);
+
+  // return <View>
+  //   <Text>sdjlfds</Text>
+  // </View>
+  return <ShowMap2 locations={locations}/>;
 }
 
 const styles = StyleSheet.create({

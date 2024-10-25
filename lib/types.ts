@@ -60,3 +60,30 @@ export type LocationParticipantsCount = {
   location_id: number;
   number_participants: number;
 };
+
+// The type for components/locationMap
+export type Location = {
+  id: number;
+  location: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  distance: {
+    metres: number;
+    nearby: boolean;
+  };
+};
+
+
+// coordinates: {
+//   latitude: x,
+//   longitude: y,
+// },
+// id: location.id,
+// location: location.location_name,
+// distance: {
+//   metres: 0,
+//   nearby: false,
+// }
+// }
