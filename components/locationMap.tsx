@@ -1,3 +1,5 @@
+// Given list of locations, display them on the screen
+
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Appearance, View, SafeAreaView, Text } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
@@ -112,7 +114,6 @@ export default function ShowMap({
     },
   };
   const [mapState, setMapState] = useState<MapState>(initialMapState);
-  const [errorMsg, setErrorMsg] = useState("");
 
   // Request the user for location permission
   // Get current user location
@@ -128,26 +129,6 @@ export default function ShowMap({
       }
     }
     requestLocationPermission();
-
-    // Get current user location
-    (async () => {
-      let { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let loc = await ExpoLocation.getCurrentPositionAsync({});
-      setMapState((prevState) => ({
-        ...prevState,
-        userLocation: {
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-          longitudeDelta: prevState.userLocation.longitudeDelta,
-          latitudeDelta: prevState.userLocation.latitudeDelta,
-        },
-      }));
-    })();
   }, []);
 
   // Update user location and nearest location when user moves

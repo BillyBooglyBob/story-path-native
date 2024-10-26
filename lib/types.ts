@@ -50,6 +50,15 @@ export type ProjectLocation = {
   extra?: string;
 };
 
+export type LocationTracking = {
+  id: number;
+  project_id: number;
+  location_id: number;
+  username: string;
+  points: number;
+  participant_username: string;
+};
+
 export type ProjectParticipantsCount = {
   project_id: number;
   number_participants: number;

@@ -60,3 +60,5 @@ Ignore location type for locations, only consider project type
 - if by QR code, QR code change score
 
 - if all cases, locations visited still changes.
+
+generate default usernames

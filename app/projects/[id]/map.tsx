@@ -7,6 +7,10 @@ export default function MapScreen() {
   const projectContext = useProject();
   const {locations, locationStatus, locationError} = projectContext || {};
 
+  // Filter locations based on project setting
+  // Show all locations, pass all locations
+  // Show only visited locations, retrieve only visited locations
+
   if (locationStatus === "pending") {
     return <Text>Loading...</Text>;
   }

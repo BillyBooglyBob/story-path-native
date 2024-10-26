@@ -4,6 +4,7 @@ import {
   ProjectLocation,
   ProjectParticipantsCount,
   LocationParticipantsCount,
+  LocationTracking,
 } from "./types";
 
 // Constants
@@ -111,7 +112,7 @@ export async function deleteLocation(locationId: number) {
 export async function getProjectParticipantsCount(
   id: number
 ): Promise<Array<ProjectParticipantsCount>> {
-  // 
+  //
   return apiRequest(`/project_participant_counts?project_id=eq.${id}`);
 }
 
@@ -120,4 +121,14 @@ export async function getLocationParticipantsCount(
   id: number
 ): Promise<Array<LocationParticipantsCount>> {
   return apiRequest(`/location_participant_counts?location_id=eq.${id}`);
+}
+
+// Get locations visited by the user
+export async function getLocationsVisitedByUser(
+  projectId: number,
+  username: string
+): Promise<Array<LocationTracking>> {
+  return apiRequest(
+    `/tracking?project_id=eq.${projectId}&participant_username=eq.${username}`
+  );
 }
