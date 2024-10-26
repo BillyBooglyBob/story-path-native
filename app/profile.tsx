@@ -10,8 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useUser } from "../UserContext";
-
+import { useUser } from "../context/UserContext";
 
 export default function ProfileScreen() {
   const { userState, setUserState } = useUser();

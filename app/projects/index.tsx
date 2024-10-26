@@ -1,37 +1,15 @@
 import { Link } from "expo-router";
 import { SafeAreaView, Text, StyleSheet, View } from "react-native";
-import { useUser } from "../../UserContext";
-import { getProjectParticipantsCount, getProjects } from "../../lib/util";
-import { Project } from "../../lib/types";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useProjectList } from "../../context/ProjectsContext";
 
 export default function ProjectsScreen() {
-  // Get username
-  const { userState } = useUser();
-
-  // Get all projects
-  const {
-    status,
-    error,
-    data: projects,
-  } = useQuery<Project[]>({
-    queryKey: ["projects"],
-    queryFn: getProjects,
-  });
-
-  // Get the number of participants for each project
-  const participantQueries = useQueries({
-    queries: (projects || []).map((project) => ({
-      queryKey: ["participants", project.id],
-      queryFn: () => getProjectParticipantsCount(project.id!),
-      enabled: !!project.id, // Only run if the project has an ID
-    })),
-  });
+  const projectListContext = useProjectList();
+  const { projects, status, error, participantQueries } = projectListContext || {};
 
   if (status === "pending")
     return <Text style={{ color: "white" }}>Loading...</Text>;
   if (status === "error")
-    return <Text style={{ color: "white" }}>{error.message}</Text>;
+    return <Text style={{ color: "white" }}>{error?.message ?? "Error has occurred"}</Text>;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,7 +17,7 @@ export default function ProjectsScreen() {
         // Ensure unpublished projects are not shown
         if (!project.is_published) return null;
 
-        const participantQuery = participantQueries[index];
+        const participantQuery = (participantQueries ?? [])[index];
         const participantsCount =
           participantQuery?.data?.[0]?.number_participants || "0";
 

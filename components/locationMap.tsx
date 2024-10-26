@@ -1,41 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Appearance, View, SafeAreaView, Text } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
-import * as Location from "expo-location";
+import * as ExpoLocation from "expo-location";
 import { getDistance } from "geolib";
-import { ProjectLocation } from "../../lib/types";
-
-// import { locations } from "./location.js";
-
-// Define Stylesheet
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  nearbyLocationSafeAreaView: {
-    backgroundColor: "black",
-  },
-  nearbyLocationView: {
-    padding: 20,
-  },
-  nearbyLocationText: {
-    color: "white",
-    lineHeight: 25,
-  },
-});
+import { ProjectLocation } from "../lib/types";
 
 // Get light or dark mode
 const colorScheme = Appearance.getColorScheme();
 
 // Component for displaying nearest location and whether it's within 100 metres
 // Add change scoring here
-function NearbyLocation2(props) {
-  if (typeof props.location != "undefined") {
+function NearbyLocation({ nearbyLocation }: { nearbyLocation: Location }) {
+  if (typeof nearbyLocation.location != "undefined") {
     return (
       <SafeAreaView style={styles.nearbyLocationSafeAreaView}>
         <View style={styles.nearbyLocationView}>
-          <Text style={styles.nearbyLocationText}>{props.location}</Text>
-          {props.distance.nearby && (
+          <Text style={styles.nearbyLocationText}>
+            {nearbyLocation.location}
+          </Text>
+          {nearbyLocation.distance.nearby && (
             <Text
               style={{
                 ...styles.nearbyLocationText,
@@ -51,28 +34,58 @@ function NearbyLocation2(props) {
   }
 }
 
-export default function ShowMap2({locations}) {
-  // console.log("locations", locations);
+export type Location = {
+  id: number;
+  location: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  distance: {
+    metres: number;
+    nearby: boolean;
+  };
+};
+
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+  longitudeDelta: number;
+  latitudeDelta: number;
+};
+
+type MapState = {
+  locationPermission: boolean;
+  locations: Location[];
+  userLocation: UserLocation;
+  nearbyLocation: Location;
+};
+
+export default function ShowMap({
+  locations,
+}: {
+  locations: ProjectLocation[];
+}) {
   // Convert string-based latlong to object-based on each location
-  const updatedLocations = locations.map((location) => {
-    const [x, y] = location.location_position.replace(/[()]/g, '').split(',').map(Number);
+  const updatedLocations: Location[] = locations.map((location) => {
+    const [x, y] = location.location_position
+      .replace(/[()]/g, "")
+      .split(",")
+      .map(Number);
 
     return {
       coordinates: {
         latitude: x,
         longitude: y,
       },
-      id: location.id,
+      id: location.id ?? 0,
       location: location.location_name,
       distance: {
         metres: 0,
         nearby: false,
-      }
-    }
+      },
+    };
   });
-
-  // console.log("updatedLocations", updatedLocations);
-  console.log("Hello")
 
   // Setup state for map data
   // Retrieve user's current location
@@ -85,19 +98,28 @@ export default function ShowMap2({locations}) {
       longitudeDelta: 0.01,
       latitudeDelta: 0.01,
     },
-    nearbyLocation: {},
+    nearbyLocation: {
+      id: 0,
+      location: "",
+      coordinates: {
+        latitude: 0,
+        longitude: 0,
+      },
+      distance: {
+        metres: 0,
+        nearby: false,
+      },
+    },
   };
-  const [mapState, setMapState] = useState(initialMapState);
-  const [errorMsg, setErrorMsg] = useState(null);
-
-  console.log("colorScheme", colorScheme);
+  const [mapState, setMapState] = useState<MapState>(initialMapState);
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Request the user for location permission
   // Get current user location
   useEffect(() => {
     // Request location permission
     async function requestLocationPermission() {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       if (status === "granted") {
         setMapState((prevState) => ({
           ...prevState,
@@ -109,26 +131,29 @@ export default function ShowMap2({locations}) {
 
     // Get current user location
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      let { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied");
         return;
       }
 
-      let loc = await Location.getCurrentPositionAsync({});
+      let loc = await ExpoLocation.getCurrentPositionAsync({});
       setMapState((prevState) => ({
         ...prevState,
         userLocation: {
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude,
+          longitudeDelta: prevState.userLocation.longitudeDelta,
+          latitudeDelta: prevState.userLocation.latitudeDelta,
         },
       }));
     })();
   }, []);
 
+  // Update user location and nearest location when user moves
   useEffect(() => {
     // Function to retrieve location nearest to current user location
-    function calculateDistance(userLocation) {
+    function calculateDistance(userLocation: UserLocation): Location {
       const nearestLocations = mapState.locations
         .map((location) => {
           const metres = getDistance(userLocation, location.coordinates);
@@ -143,22 +168,37 @@ export default function ShowMap2({locations}) {
             previousLocation.distance.metres - thisLocation.distance.metres
           );
         });
-      return nearestLocations.shift();
+      return (
+        nearestLocations.shift() || {
+          id: 0,
+          location: "",
+          coordinates: {
+            latitude: 0,
+            longitude: 0,
+          },
+          distance: {
+            metres: 0,
+            nearby: false,
+          },
+        }
+      );
     }
 
-    let locationSubscription = null;
+    let locationSubscription: ExpoLocation.LocationSubscription | null = null;
 
     if (mapState.locationPermission) {
       (async () => {
-        locationSubscription = await Location.watchPositionAsync(
+        locationSubscription = await ExpoLocation.watchPositionAsync(
           {
-            accuracy: Location.Accuracy.High,
+            accuracy: ExpoLocation.Accuracy.High,
             distanceInterval: 10, // in meters
           },
           (location) => {
             const userLocation = {
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
+              longitudeDelta: mapState.userLocation.longitudeDelta,
+              latitudeDelta: mapState.userLocation.latitude,
             };
             const nearbyLocation = calculateDistance(userLocation);
             setMapState((prevState) => ({
@@ -199,8 +239,8 @@ export default function ShowMap2({locations}) {
             latitude: mapState.userLocation.latitude,
             longitude: mapState.userLocation.longitude,
           }}
-          title="UQ St Lucia Campus"
-          description="University of Queensland, St Lucia Campus"
+          title="You are here"
+          description="Your current location"
         />
         {mapState.locations.map((location) => (
           <Circle
@@ -218,7 +258,24 @@ export default function ShowMap2({locations}) {
         ))}
       </MapView>
       {/* If current nearby location is within 100m of user, will say so */}
-      <NearbyLocation2 {...mapState.nearbyLocation} />
+      <NearbyLocation nearbyLocation={mapState.nearbyLocation} />
     </>
   );
 }
+
+// Define Stylesheet
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  nearbyLocationSafeAreaView: {
+    backgroundColor: "black",
+  },
+  nearbyLocationView: {
+    padding: 20,
+  },
+  nearbyLocationText: {
+    color: "white",
+    lineHeight: 25,
+  },
+});

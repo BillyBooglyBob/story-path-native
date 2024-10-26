@@ -22,3 +22,41 @@ Home
 
 react-native-maps@1.18.0 - expected version: 1.14.0
   typescript@5.6.3 - expected version: ~5.3.3
+
+
+work out 
+- loading/error screen, more custom
+- a useful 
+
+use redux to centralise API fetching
+
+Project Preview
+- project title, instructions
+- scoring + locations visited
+  - should it automatically update even when not on the map screen?
+- location content display
+  - location to display depends on the user selection, not on location?
+  - include # participants who unlocked the location (scored from it)
+
+Map
+- based on project modes
+  - display all locations
+  - display only visited locations
+    - knows all the locations for the project, only shows ones that have been
+      visited, need to somehow keep track of this
+- logic can be done when retrieving the locations and the project, just filter
+  through the locations first, before passing to locationiMap, it only displays
+  so extract nearbyLocation from it? so it can have a function that sends
+  API request to update location visited and change the scoring?
+  - consider using trackingAPI to check if this location visited by this username?
+
+QR code
+- if scoring is QR code only, then Map should only change the locations
+  based on the user
+
+Ignore location type for locations, only consider project type
+- if no scoring, scoring 0
+- if by location, location visit changes score
+- if by QR code, QR code change score
+
+- if all cases, locations visited still changes.

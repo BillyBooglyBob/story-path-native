@@ -1,24 +1,11 @@
 import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView, StyleSheet, Text } from "react-native";
-import { getProject } from "../../../lib/util";
-import { useQuery } from "@tanstack/react-query";
-import { Project } from "../../../lib/types";
 import WebView from "react-native-webview";
+import { useProject } from "../../../context/ProjectContext";
 
 export default function ProjectDetailsScreen() {
-  const { id: projectId } = useLocalSearchParams();
-
-  // Retrieve project details
-  const {
-    status,
-    error,
-    data: projectData,
-  } = useQuery<Project[]>({
-    queryKey: ["project", projectId],
-    queryFn: () => getProject(Number(projectId)),
-  });
-
-  const project = projectData?.[0];
+  const projectContext = useProject();
+  const project = projectContext?.project;
 
   return (
     <SafeAreaView

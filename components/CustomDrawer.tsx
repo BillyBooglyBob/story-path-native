@@ -4,7 +4,7 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { View, Image, Text, SafeAreaView } from "react-native";
-import { useUser } from "../UserContext";
+import { useUser } from "../context/UserContext";
 
 const CustomDrawer = (props: any) => {
   const { userState } = useUser();

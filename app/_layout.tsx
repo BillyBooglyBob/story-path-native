@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import CustomDrawer from "../components/CustomDrawer";
 import { SafeAreaView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { UserProvider } from "../UserContext";
+import { UserProvider } from "../context/UserContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();

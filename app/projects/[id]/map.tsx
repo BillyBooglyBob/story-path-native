@@ -1,31 +1,21 @@
-import { useLocalSearchParams } from "expo-router";
-import { SafeAreaView, Text, StyleSheet, View } from "react-native";
-import { getLocations } from "../../../lib/util";
-import { useQuery } from "@tanstack/react-query";
-import { ProjectLocation } from "../../../lib/types";
-// import ShowMap from "../../../components/locationMap/ShowMap";
-import ShowMap2 from "../../../components/locationMap/test";
+import { StyleSheet, Text } from "react-native";
+import ShowMap from "../../../components/locationMap"
+import { useProject } from "../../../context/ProjectContext";
 
 export default function MapScreen() {
-  // Get all locations for the current project and display them on the map
+  // Get all locations for the current project and display them on the map 
+  const projectContext = useProject();
+  const {locations, locationStatus, locationError} = projectContext || {};
 
-  // Get all locations
-  const { id: projectId } = useLocalSearchParams();
-  const {
-    status,
-    error,
-    data: locations,
-  } = useQuery<ProjectLocation[]>({
-    queryKey: ["locations", projectId],
-    queryFn: () => getLocations(Number(projectId)),
-  });
+  if (locationStatus === "pending") {
+    return <Text>Loading...</Text>;
+  }
 
-  // console.log("locations", locations);
+  if (locationStatus === "error") {
+    return <Text>Error: {locationError?.message ?? "Error has occurred"}</Text>;
+  }
 
-  // return <View>
-  //   <Text>sdjlfds</Text>
-  // </View>
-  return <ShowMap2 locations={locations}/>;
+  return <ShowMap locations={locations ?? []}/>;
 }
 
 const styles = StyleSheet.create({
