@@ -2,11 +2,27 @@ import { Link } from "expo-router";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import WebView from "react-native-webview";
 import { useProject } from "../../../context/ProjectContext";
+import { SCORING_OPTIONS } from "../../../lib/constants";
 
 export default function ProjectDetailsScreen() {
   const projectContext = useProject();
-  const { project, allLocations, visitedLocations, locationStatus, locationError } =
-    projectContext || {};
+  const {
+    project,
+    allLocations,
+    visitedLocations,
+    locationStatus,
+    locationError,
+  } = projectContext || {};
+
+  let totalScore =
+    allLocations?.reduce((acc, location) => {
+      return acc + location.score_points;
+    }, 0) ?? 0;
+
+  let userScore =
+    visitedLocations?.reduce((acc, location) => {
+      return acc + location.score_points;
+    }, 0) ?? 0;
 
   return (
     <SafeAreaView
@@ -20,6 +36,12 @@ export default function ProjectDetailsScreen() {
       <View>
         <Text>
           Locations visited: {visitedLocations?.length}/{allLocations?.length}
+        </Text>
+        <Text>
+          Score:{" "}
+          {project?.participant_scoring === SCORING_OPTIONS.notScored
+            ? "Not Scored"
+            : `${userScore} / ${totalScore}`}
         </Text>
       </View>
     </SafeAreaView>

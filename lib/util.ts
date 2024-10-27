@@ -1,3 +1,4 @@
+import { getDistance } from "geolib";
 import {
   Project,
   ApiOptions,
@@ -5,6 +6,8 @@ import {
   ProjectParticipantsCount,
   LocationParticipantsCount,
   LocationTracking,
+  Location,
+  UserLocation,
 } from "./types";
 
 // Constants
@@ -17,7 +20,7 @@ const USERNAME: string = process.env.VITE_USERNAME as string;
 async function apiRequest(
   endpoint: string,
   method = "GET",
-  body: Project | ProjectLocation | null = null
+  body: Project | ProjectLocation | LocationTracking | null = null
 ) {
   const options: ApiOptions = {
     method, // Set the HTTP method (GET, POST, PATCH)
@@ -130,5 +133,55 @@ export async function getLocationsVisitedByUser(
 ): Promise<Array<LocationTracking>> {
   return apiRequest(
     `/tracking?project_id=eq.${projectId}&participant_username=eq.${username}`
+  );
+}
+
+// Function to insert a new project into the database.
+export async function createTracking(
+  projectId: number,
+  location: ProjectLocation,
+  username: string
+): Promise<object> {
+  const { id: locationId, score_points } = location;
+  const tracking: LocationTracking = {
+    project_id: projectId,
+    location_id: locationId ?? 0,
+    participant_username: username,
+    points: score_points,
+  };
+  console.log(tracking);
+  return apiRequest("/tracking", "POST", tracking);
+}
+
+// Function to retrieve location nearest to current user location
+export function calculateDistance(
+  userLocation: UserLocation,
+  locations: Location[]
+): Location {
+  const nearestLocations = locations
+    .map((location) => {
+      const metres = getDistance(userLocation, location.coordinates);
+      location["distance"] = {
+        metres: metres,
+        nearby: metres <= 100 ? true : false,
+      };
+      return location;
+    })
+    .sort((previousLocation, thisLocation) => {
+      return previousLocation.distance.metres - thisLocation.distance.metres;
+    });
+  return (
+    nearestLocations.shift() || {
+      id: 0,
+      location: "",
+      coordinates: {
+        latitude: 0,
+        longitude: 0,
+      },
+      distance: {
+        metres: 0,
+        nearby: false,
+      },
+    }
   );
 }

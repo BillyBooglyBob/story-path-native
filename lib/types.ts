@@ -52,10 +52,10 @@ export type ProjectLocation = {
 
 // Type returned from API tracking user visits to locations
 export type LocationTracking = {
-  id: number;
+  id?: number;
   project_id: number;
   location_id: number;
-  username: string;
+  username?: string;
   points: number;
   participant_username: string;
 };
@@ -83,7 +83,6 @@ export type UserLocation = {
 };
 
 export type MapState = {
-  locationPermission: boolean;
   locations: Location[];
   userLocation: UserLocation;
   nearbyLocation: Location;

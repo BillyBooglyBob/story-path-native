@@ -1,12 +1,14 @@
 // ProjectContext.js
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import * as ExpoLocation from "expo-location";
 import { getDistance } from "geolib";
 import {
   getProject,
   getLocations,
   getLocationsVisitedByUser,
+  createTracking,
+  calculateDistance,
 } from "../lib/util"; // Assume these functions fetch the data
 import {
   LocationTracking,
@@ -18,6 +20,8 @@ import {
 } from "../lib/types";
 import { HOMESCREEN_DISPLAY_OPTIONS } from "../lib/constants";
 import { useUser } from "./UserContext";
+import { useProjectData } from "../hooks/useProjectData";
+import { useLocationPermission } from "../hooks/useLocationPermission";
 
 // Define the shape of your context
 interface ProjectContextType {
@@ -45,72 +49,37 @@ export function ProjectProvider({
   const username = userContext?.userState.username;
 
   // RETRIEVE DATA FROM API
-  // Retrieve project details
   const {
-    status: projectStatus,
-    error: projectError,
-    data: projectData,
-  } = useQuery<Project[]>({
-    queryKey: ["project", projectId],
-    queryFn: () => getProject(Number(projectId)),
-  });
-
-  const project = projectData?.[0];
-
-  // Retrieve project locations
-  const {
-    status: locationStatus,
-    error: locationError,
-    data: locationsData,
-  } = useQuery<ProjectLocation[]>({
-    queryKey: ["locations", projectId],
-    queryFn: () => getLocations(Number(projectId)),
-  });
-
-  // Retrieve locations visited by the user
-  const { data: visitedLocationIdsData } = useQuery<LocationTracking[]>({
-    queryKey: ["locationsVisited", username],
-    queryFn: () => getLocationsVisitedByUser(Number(projectId), username ?? ""),
-  });
+    projectQuery,
+    locationQuery,
+    locationTrackingQuery,
+    setLocationVisitedMutation,
+  } = useProjectData(Number(projectId), username || "");
 
   // GET LOCATIONS DATA
-  const allLocations = locationsData;
+  const allLocations = locationQuery.data;
   let visitedLocations: ProjectLocation[] | undefined = [];
   let visibleLocations: ProjectLocation[] | undefined = [];
 
   // Get visited locations
-  visitedLocations = locationsData?.filter((location) => {
-    return visitedLocationIdsData?.some(
+  const visitedLocationIds = locationTrackingQuery.data;
+  visitedLocations = allLocations?.filter((location) => {
+    return visitedLocationIds?.some(
       (visitedLocationId) => visitedLocationId.location_id === location.id
     );
   });
 
   // Get visible locations based on project setting
+  const project = projectQuery.data?.[0];
   project?.homescreen_display === HOMESCREEN_DISPLAY_OPTIONS.allLocations
     ? (visibleLocations = allLocations)
     : (visibleLocations = visitedLocations);
 
-  // Map has two options
-  // 1. Show all locations
-  // 2. Show only visited locations
-
-  // Preview shows only visited locations and all locations
-
-  // Filter locations based on project setting
-  // Either show all locations or only visited locations
-  // let locationsVisited = locations;
-  // if (project?.homescreen_display !== HOMESCREEN_DISPLAY_OPTIONS.allLocations) {
-  //   // Filter for locations visited by the user only
-  //   locationsVisited = locationsVisited?.filter((location) => {
-  //     return locationsVisitedData?.some(
-  //       (visitedLocation) => visitedLocation.location_id === location.id
-  //     );
-  //   });
-  // }
-
   // Keep track of the geographical info of the user and project
+  // Request the user for location permission when initialised
+  const locationPermission = useLocationPermission();
+
   const initialMapState = {
-    locationPermission: false,
     locations: [],
     userLocation: {
       latitude: 0,
@@ -133,36 +102,6 @@ export function ProjectProvider({
   };
 
   const [mapState, setMapState] = useState<MapState>(initialMapState);
-
-  // Function to retrieve location nearest to current user location
-  function calculateDistance(userLocation: UserLocation): Location {
-    const nearestLocations = mapState.locations
-      .map((location) => {
-        const metres = getDistance(userLocation, location.coordinates);
-        location["distance"] = {
-          metres: metres,
-          nearby: metres <= 100 ? true : false,
-        };
-        return location;
-      })
-      .sort((previousLocation, thisLocation) => {
-        return previousLocation.distance.metres - thisLocation.distance.metres;
-      });
-    return (
-      nearestLocations.shift() || {
-        id: 0,
-        location: "",
-        coordinates: {
-          latitude: 0,
-          longitude: 0,
-        },
-        distance: {
-          metres: 0,
-          nearby: false,
-        },
-      }
-    );
-  }
 
   // Update the mapState when the locations data from the API changes
   useEffect(() => {
@@ -197,51 +136,19 @@ export function ProjectProvider({
     }
   }, [visibleLocations]);
 
-  // Request the user for location permission
-  // Get current user location
-  useEffect(() => {
-    // Request location permission
-    async function requestLocationPermission() {
-      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (status === "granted") {
-        setMapState((prevState) => ({
-          ...prevState,
-          locationPermission: true,
-        }));
-      }
-    }
-    requestLocationPermission();
-  }, []);
-
   // Update user location and nearest location
   useEffect(() => {
     let locationSubscription: ExpoLocation.LocationSubscription | null = null;
 
     // Ensure location permission and locations data are available
-    if (mapState.locationPermission && mapState.locations.length > 0) {
+    if (locationPermission && mapState.locations.length > 0) {
       (async () => {
-        // Get the initial user location and set nearbyLocation on first load
-        // const location = await ExpoLocation.getCurrentPositionAsync({});
-        // const userLocation = {
-        //   latitude: location.coords.latitude,
-        //   longitude: location.coords.longitude,
-        //   longitudeDelta: mapState.userLocation.longitudeDelta,
-        //   latitudeDelta: mapState.userLocation.latitudeDelta,
-        // };
-
-        // // Calculate the nearest location
-        // const nearbyLocation = calculateDistance(userLocation);
-        // setMapState((prevState) => ({
-        //   ...prevState,
-        //   userLocation,
-        //   nearbyLocation,
-        // }));
-
         // Start watching the user's position
         locationSubscription = await ExpoLocation.watchPositionAsync(
           {
             accuracy: ExpoLocation.Accuracy.High,
             distanceInterval: 10, // in meters
+            timeInterval: 5000, // in milliseconds
           },
           (location) => {
             const updatedUserLocation = {
@@ -250,13 +157,35 @@ export function ProjectProvider({
               longitudeDelta: mapState.userLocation.longitudeDelta,
               latitudeDelta: mapState.userLocation.latitudeDelta,
             };
-            const updatedNearbyLocation =
-              calculateDistance(updatedUserLocation);
+
+            const updatedNearbyLocation = calculateDistance(
+              updatedUserLocation,
+              mapState.locations
+            );
+
             setMapState((prevState) => ({
               ...prevState,
               userLocation: updatedUserLocation,
               nearbyLocation: updatedNearbyLocation,
             }));
+
+            console.log("User location updated", updatedUserLocation);
+
+            // Check if user is within radius of nearby location
+            // If so, mark location as visited if it is not visited already
+            if (mapState.nearbyLocation.distance.nearby) {
+              console.log("Within radius of nearby location!");
+              // Mark location as visited if it is not visited already
+              if (
+                !visitedLocations?.some(
+                  (location) => location.id === mapState.nearbyLocation.id
+                )
+              ) {
+                console.log("Location not visited yet!");
+                // Mark location as visited
+                setLocationVisitedMutation.mutate(mapState.nearbyLocation);
+              }
+            }
           }
         );
       })();
@@ -268,17 +197,17 @@ export function ProjectProvider({
         locationSubscription.remove();
       }
     };
-  }, [mapState.locationPermission, mapState.locations]);
+  }, [locationPermission, mapState.locations]);
 
   // Pass both project and locations data along with their status/error info
   const contextValue = {
-    project,
-    projectStatus,
-    projectError,
-    allLocations,
+    project: projectQuery.data?.[0],
+    projectStatus: projectQuery.status,
+    projectError: projectQuery.error,
+    allLocations: locationQuery.data,
     visitedLocations,
-    locationStatus,
-    locationError,
+    locationStatus: locationQuery.status,
+    locationError: locationQuery.error,
     mapState,
   };
 
