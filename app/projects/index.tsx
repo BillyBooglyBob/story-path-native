@@ -1,15 +1,21 @@
 import { Link } from "expo-router";
 import { SafeAreaView, Text, StyleSheet, View } from "react-native";
 import { useProjectList } from "../../context/ProjectsContext";
-
 export default function ProjectsScreen() {
   const projectListContext = useProjectList();
-  const { projects, status, error, participantQueries } = projectListContext || {};
+
+
+  const { projects, status, error, participantQueries } =
+    projectListContext || {};
 
   if (status === "pending")
     return <Text style={{ color: "white" }}>Loading...</Text>;
   if (status === "error")
-    return <Text style={{ color: "white" }}>{error?.message ?? "Error has occurred"}</Text>;
+    return (
+      <Text style={{ color: "white" }}>
+        {error?.message ?? "Error has occurred"}
+      </Text>
+    );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -28,6 +34,7 @@ export default function ProjectsScreen() {
               <View style={styles.participantsBubble}>
                 <Text style={styles.participantsText}>{participantsCount}</Text>
               </View>
+              
             </View>
           </Link>
         );

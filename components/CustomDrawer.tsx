@@ -1,13 +1,13 @@
 import {
   DrawerContentScrollView,
-  DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { View, Image, Text, SafeAreaView } from "react-native";
 import { useUser } from "../context/UserContext";
 
 const CustomDrawer = (props: any) => {
-  const { userState } = useUser();
+  const userContext = useUser();
+  const userState = userContext?.userState;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
@@ -19,7 +19,7 @@ const CustomDrawer = (props: any) => {
         <View style={{ alignItems: "center" }}>
           <Image
             source={
-              userState.uri
+              userState?.uri
                 ? { uri: userState.uri }
                 : require("../assets/user.png") // Default image
             }
@@ -39,7 +39,7 @@ const CustomDrawer = (props: any) => {
               color: "black",
             }}
           >
-            {userState.username}
+            {userState?.username}
           </Text>
         </View>
         <View style={{ backgroundColor: "white", flex: 1 }}>

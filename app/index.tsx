@@ -7,7 +7,7 @@ export default function HomeScreen() {
     <SafeAreaView
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      <Text className="bg-black">Home Screen</Text>
+      <Text>Home Screen</Text>
       <Link href="/profile">Go to Profile</Link>
       <Link href="/projects">Go to Projects</Link>
     </SafeAreaView>

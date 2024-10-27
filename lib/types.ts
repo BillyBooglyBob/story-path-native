@@ -50,6 +50,7 @@ export type ProjectLocation = {
   extra?: string;
 };
 
+// Type returned from API tracking user visits to locations
 export type LocationTracking = {
   id: number;
   project_id: number;
@@ -59,11 +60,42 @@ export type LocationTracking = {
   participant_username: string;
 };
 
+// Location data containing only geographical information
+export type Location = {
+  id: number;
+  location: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  distance: {
+    metres: number;
+    nearby: boolean;
+  };
+};
+
+// Keep track of user's current location
+export type UserLocation = {
+  latitude: number;
+  longitude: number;
+  longitudeDelta: number;
+  latitudeDelta: number;
+};
+
+export type MapState = {
+  locationPermission: boolean;
+  locations: Location[];
+  userLocation: UserLocation;
+  nearbyLocation: Location;
+};
+
+// # of participants in a project
 export type ProjectParticipantsCount = {
   project_id: number;
   number_participants: number;
 };
 
+// # of participants in a location
 export type LocationParticipantsCount = {
   project_id: number;
   location_id: number;

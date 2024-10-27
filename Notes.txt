@@ -28,7 +28,9 @@ work out
 - loading/error screen, more custom
 - a useful 
 
-use redux to centralise API fetching
+- dashboard navigation
+- implement locations count in preview
+- send request to set location as visited when near
 
 Project Preview
 - project title, instructions
@@ -61,4 +63,4 @@ Ignore location type for locations, only consider project type
 
 - if all cases, locations visited still changes.
 
-generate default usernames
+

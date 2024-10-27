@@ -9,12 +9,12 @@ export default function ProjectTabs() {
   // Since id is of type string | string[], we need to handle both cases
   const projectId = Array.isArray(id) ? id[0] : id;
 
-  const { userState } = useUser();
-  const username = userState.username;
+  const userContext = useUser();
+  const userState = userContext?.userState;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ProjectProvider projectId={projectId} username={username ?? ""}>
+      <ProjectProvider projectId={projectId} username={userState?.username ?? ""}>
         <Tabs screenOptions={{ headerShown: false }}>
           <Tabs.Screen
             name="index"

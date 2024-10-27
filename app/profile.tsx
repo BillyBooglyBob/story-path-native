@@ -13,7 +13,8 @@ import * as ImagePicker from "expo-image-picker";
 import { useUser } from "../context/UserContext";
 
 export default function ProfileScreen() {
-  const { userState, setUserState } = useUser();
+  const userContext = useUser();
+  const { userState, setUserState } = userContext || {};
 
   // Function to handle photo selection using the Image Picker
   async function handleChangePress() {
@@ -26,7 +27,7 @@ export default function ProfileScreen() {
 
     // If the user didn't cancel and an image is selected, update the state
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setUserState((prevState) => ({
+      setUserState?.((prevState) => ({
         ...prevState,
         uri: result.assets[0].uri,
       }));
@@ -35,11 +36,11 @@ export default function ProfileScreen() {
 
   // Function to remove the selected photo
   async function handleRemovePress() {
-    setUserState((prevState) => ({ ...prevState, uri: "" }));
+    setUserState?.((prevState) => ({ ...prevState, uri: "" }));
   }
 
   // Check if a photo has been selected
-  const hasPhoto = Boolean(userState.uri);
+  const hasPhoto = Boolean(userState?.uri);
 
   // Component to display the selected photo or a placeholder
   function Photo() {
@@ -49,7 +50,7 @@ export default function ProfileScreen() {
           <Image
             style={styles.photoFullImage}
             resizeMode="cover"
-            source={{ uri: userState.uri }}
+            source={{ uri: userState?.uri }}
           />
         </View>
       );
@@ -60,7 +61,7 @@ export default function ProfileScreen() {
 
   // Function to handle username change
   function handleUsernameChange(text: string) {
-    setUserState((prevState) => ({
+    setUserState?.((prevState) => ({
       ...prevState,
       username: text,
     }));
@@ -84,7 +85,7 @@ export default function ProfileScreen() {
           style={styles.input}
           placeholder="Enter your username"
           placeholderTextColor="#ccc"
-          value={userState.username}
+          value={userState?.username}
           onChangeText={handleUsernameChange}
         />
       </View>

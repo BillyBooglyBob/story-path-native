@@ -1,40 +1,39 @@
 // Share the user state across the app using React Context API
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import uuid from "react-native-uuid";
 
 // Define the shape of your User state
-interface UserState {
+type UserState = {
   uri?: string;
   username?: string;
 }
 
+type UserContextType = {
+  userState: UserState;
+  setUserState: React.Dispatch<React.SetStateAction<UserState>>;
+};
+
+
 // Create the context
-const UserContext = createContext<
-  | {
-      userState: UserState;
-      setUserState: React.Dispatch<React.SetStateAction<UserState>>;
-    }
-  | undefined
->(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+// Custom hook to use the UserContext
+export const useUser = () => useContext(UserContext);
 
 // Create a provider component
 export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [userState, setUserState] = useState<UserState>({ username: "" }); // Initialize with default values
+  // Give each user a default unique username
+  const defaultUserName = `user-${uuid.v4().slice(0, 8)}`;
+  const [userState, setUserState] = useState<UserState>({
+    username: defaultUserName,
+  }); // Initialize with default values
 
   return (
     <UserContext.Provider value={{ userState, setUserState }}>
       {children}
     </UserContext.Provider>
   );
-};
-
-// Custom hook to use the UserContext
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
 };
