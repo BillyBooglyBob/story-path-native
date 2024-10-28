@@ -2,19 +2,15 @@ import { Tabs, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ProjectProvider } from "../../../context/ProjectContext";
-import { useUser } from "../../../context/UserContext";
 
 export default function ProjectTabs() {
   const { id } = useLocalSearchParams();
   // Since id is of type string | string[], we need to handle both cases
   const projectId = Array.isArray(id) ? id[0] : id;
 
-  const userContext = useUser();
-  const userState = userContext?.userState;
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ProjectProvider projectId={projectId} username={userState?.username ?? ""}>
+      <ProjectProvider projectId={projectId}>
         <Tabs screenOptions={{ headerShown: false }}>
           <Tabs.Screen
             name="index"

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createTracking,
   getLocations,
@@ -13,6 +13,8 @@ import {
 } from "../lib/types";
 
 export const useProjectData = (projectId: number, username: string) => {
+  const queryClient = useQueryClient();
+
   const projectQuery = useQuery<Project[]>({
     queryKey: ["project", projectId],
     queryFn: () => getProject(Number(projectId)),
@@ -49,6 +51,12 @@ export const useProjectData = (projectId: number, username: string) => {
     mutationFn: createTrackingFn,
     onSuccess: () => {
       console.log("Location marked as visited");
+
+      // Invalidate the location query to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["locationsVisited", username],
+      });
+      queryClient.invalidateQueries({ queryKey: ["locations", projectId] });
     },
     onError: (error) => {
       console.log("Error marking location as visited", error);

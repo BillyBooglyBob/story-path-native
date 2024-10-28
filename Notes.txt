@@ -61,6 +61,8 @@ Ignore location type for locations, only consider project type
 - if by location, location visit changes score
 - if by QR code, QR code change score
 
+- set scoring to 0 by setting visitedLocations to send with score of 0
+
 - if all cases, locations visited still changes.
 
 

@@ -1,30 +1,23 @@
 // ProjectContext.js
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import * as ExpoLocation from "expo-location";
-import { getDistance } from "geolib";
 import {
-  getProject,
-  getLocations,
-  getLocationsVisitedByUser,
-  createTracking,
   calculateDistance,
 } from "../lib/util"; // Assume these functions fetch the data
 import {
-  LocationTracking,
   MapState,
   Project,
   ProjectLocation,
   Location,
-  UserLocation,
 } from "../lib/types";
 import { HOMESCREEN_DISPLAY_OPTIONS } from "../lib/constants";
 import { useUser } from "./UserContext";
 import { useProjectData } from "../hooks/useProjectData";
 import { useLocationPermission } from "../hooks/useLocationPermission";
+import { UseMutationResult } from "@tanstack/react-query";
 
 // Define the shape of your context
-interface ProjectContextType {
+type ProjectContextType = {
   project: Project | undefined;
   projectStatus: "error" | "success" | "pending";
   projectError: Error | null;
@@ -33,6 +26,13 @@ interface ProjectContextType {
   locationStatus: "error" | "success" | "pending";
   locationError: Error | null;
   mapState: MapState;
+  locationPermission: boolean
+  setLocationVisitedMutation: UseMutationResult<
+    object,
+    Error,
+    Location,
+    unknown
+  >;
 }
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -170,6 +170,7 @@ export function ProjectProvider({
             }));
 
             console.log("User location updated", updatedUserLocation);
+            console.log("Nearby location updated", updatedNearbyLocation);
 
             // Check if user is within radius of nearby location
             // If so, mark location as visited if it is not visited already
@@ -209,6 +210,8 @@ export function ProjectProvider({
     locationStatus: locationQuery.status,
     locationError: locationQuery.error,
     mapState,
+    locationPermission,
+    setLocationVisitedMutation,
   };
 
   return (

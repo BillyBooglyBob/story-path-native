@@ -1,4 +1,4 @@
-import { StyleSheet, Appearance, View, SafeAreaView, Text } from "react-native";
+import { StyleSheet, Appearance } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { useProject } from "../../../context/ProjectContext";
 import NearbyLocation from "../../../components/NearbyLocation";
@@ -10,9 +10,9 @@ export default function MapScreen() {
   // Setup state for map data
   // Retrieve user's current location
   const projectContext = useProject();
-  const mapState = projectContext?.mapState;
+  const { locationPermission, mapState } = projectContext || {};
 
-  if (!mapState) {
+  if (!locationPermission || !mapState) {
     return null; // or you can return a loading spinner or some other fallback UI
   }
 
@@ -26,7 +26,7 @@ export default function MapScreen() {
           altitude: 3000, // Zoom level for iOS
           zoom: 15, // Zoom level For Android
         }}
-        showsUserLocation={mapState.locationPermission}
+        showsUserLocation={locationPermission}
         style={styles.container}
         // customMapStyle={"dark"}
         initialRegion={mapState.userLocation}
