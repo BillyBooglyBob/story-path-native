@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-import WebView from "react-native-webview";
+
 import { useProject } from "../../../context/ProjectContext";
 import { SCORING_OPTIONS } from "../../../lib/constants";
 

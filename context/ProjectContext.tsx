@@ -1,15 +1,8 @@
 // ProjectContext.js
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as ExpoLocation from "expo-location";
-import {
-  calculateDistance,
-} from "../lib/util"; // Assume these functions fetch the data
-import {
-  MapState,
-  Project,
-  ProjectLocation,
-  Location,
-} from "../lib/types";
+import { calculateDistance } from "../lib/util"; // Assume these functions fetch the data
+import { MapState, Project, ProjectLocation, Location } from "../lib/types";
 import { HOMESCREEN_DISPLAY_OPTIONS } from "../lib/constants";
 import { useUser } from "./UserContext";
 import { useProjectData } from "../hooks/useProjectData";
@@ -26,14 +19,16 @@ type ProjectContextType = {
   locationStatus: "error" | "success" | "pending";
   locationError: Error | null;
   mapState: MapState;
-  locationPermission: boolean
-  setLocationVisitedMutation: UseMutationResult<
-    object,
-    Error,
-    Location,
-    unknown
-  >;
-}
+  locationPermission: boolean;
+  locationOverlay: {
+    newLocationVisited: {
+      newLocationVisited: boolean;
+      newLocation: ProjectLocation;
+    };
+    setNewLocationVisited: (location: Location) => void;
+    setLocationAlreadyVisited: () => void;
+  };
+};
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export const useProject = () => useContext(ProjectContext);
@@ -47,6 +42,43 @@ export function ProjectProvider({
 }) {
   const userContext = useUser();
   const username = userContext?.userState.username;
+
+  // Create additional state to manage location tracking and
+  // set locationVisit to true, so it overlays over the entire screen
+  // and another button to close the overlay
+  const [newLocationVisited, setLocationVisited] = useState({
+    newLocationVisited: false,
+    newLocation: {} as ProjectLocation,
+  });
+
+  // Location not visited yet, set it as visited
+  const setNewLocationVisited = (location: Location) => {
+    // Extract location content for the new location
+    const locationContent = locationQuery.data?.find(
+      (loc) => loc.id === location.id
+    );
+    setLocationVisited({
+      newLocationVisited: true,
+      newLocation: locationContent ?? ({} as ProjectLocation),
+    });
+
+    // Call the mutation function to mark the location as visited
+    setLocationVisitedMutation.mutate(location);
+  };
+
+  // location visited already, set it as false
+  const setLocationAlreadyVisited = () => {
+    setLocationVisited({
+      newLocationVisited: false,
+      newLocation: {} as ProjectLocation,
+    });
+  };
+
+  const locationOverlay = {
+    newLocationVisited,
+    setNewLocationVisited,
+    setLocationAlreadyVisited,
+  };
 
   // RETRIEVE DATA FROM API
   const {
@@ -184,7 +216,7 @@ export function ProjectProvider({
               ) {
                 console.log("Location not visited yet!");
                 // Mark location as visited
-                setLocationVisitedMutation.mutate(mapState.nearbyLocation);
+                locationOverlay.setNewLocationVisited(mapState.nearbyLocation);
               }
             }
           }
@@ -211,7 +243,7 @@ export function ProjectProvider({
     locationError: locationQuery.error,
     mapState,
     locationPermission,
-    setLocationVisitedMutation,
+    locationOverlay,
   };
 
   return (

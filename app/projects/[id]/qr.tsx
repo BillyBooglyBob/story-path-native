@@ -2,19 +2,22 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
 import { SafeAreaView, Text, StyleSheet, View, Button } from "react-native";
 import { useProject } from "../../../context/ProjectContext";
+import LocationPopUp from "../../../components/LocationPopUp";
 
 export default function QRScreen() {
-  const [scanned, setScanned] = useState(false);
-  const [scannedData, setScannedData] = useState("");
+  // States to store permission of QR data
   const [permission, requestPermission] = useCameraPermissions();
+  const [qrData, setQrData] = useState({
+    scanned: false,
+    scannedData: "",
+  });
 
+  // Get location data from the project context
   const projectContext = useProject();
-  const { mapState, visitedLocations, setLocationVisitedMutation } =
-    projectContext || {};
+  const { mapState, visitedLocations, locationOverlay } = projectContext || {};
 
   // Camera permission still loading
   if (!permission) {
-    // Camera permissions are still loading
     return (
       <View style={styles.container}>
         <Text>Requesting permissions...</Text>
@@ -35,42 +38,62 @@ export default function QRScreen() {
   }
 
   // Handle when barcode is scanned
-  const handleBarCodeScanned = ({data}: {data: string}) => {
-    setScanned(true);
-    setScannedData(data);
+  const handleBarCodeScanned = ({ data }: { data: string }) => {
+    setQrData((prev) => ({
+      ...prev,
+      scanned: true,
+      scannedData: data,
+    }));
 
     const [_, locationId] = data.split(",");
-    const locationIdNumber = Number(locationId)
+    const locationIdNumber = Number(locationId);
 
-    // Set location to visited if not visited already
-    if (
-      !(visitedLocations || []).some((location) => location.id === locationIdNumber)
-    ) {
-      // Get the full location with the given id
-      const location = mapState?.locations?.find(
-        (location) => location.id === locationIdNumber
-      );
-      if (location) {
-        console.log("Setting location as visited", location);
-        setLocationVisitedMutation?.mutate(location);
-      }
-    }
+    const visitedAlready = !(visitedLocations || []).some(
+      (location) => location.id === locationIdNumber
+    );
+
+    const location = mapState?.locations?.find(
+      (location) => location.id === locationIdNumber
+    );
+
+    visitedAlready
+      ? location && locationOverlay?.setNewLocationVisited(location)
+      : locationOverlay?.setLocationAlreadyVisited();
+  };
+
+  // Handle scan again, reset scanned state
+  const setScannedFalse = () => {
+    setQrData({
+      scanned: false,
+      scannedData: "",
+    });
+  };
+
+  // Close the overlay
+  const closeOverlay = () => {
+    locationOverlay?.setLocationAlreadyVisited();
+    setScannedFalse();
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <CameraView
         style={styles.camera}
-        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        onBarcodeScanned={qrData.scanned ? undefined : handleBarCodeScanned}
       />
-      {scanned && (
+      {qrData.scanned && (
         <View style={styles.scanResultContainer}>
-          <Text style={styles.scanResultText}>Scanned data: {scannedData}</Text>
-          <Button
-            title="Press to scan again"
-            onPress={() => setScanned(false)}
-          />
+          <Text style={styles.scanResultText}>
+            {locationOverlay?.newLocationVisited.newLocationVisited
+              ? "New location visited"
+              : "Location already visited"}
+          </Text>
+          <Button title="Press to scan again" onPress={setScannedFalse} />
         </View>
+      )}
+      {/* If new location visited, display the content as overlay */}
+      {locationOverlay?.newLocationVisited.newLocationVisited && (
+        <LocationPopUp handleClose={closeOverlay}/>
       )}
     </SafeAreaView>
   );

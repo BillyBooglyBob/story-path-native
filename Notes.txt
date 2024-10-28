@@ -66,3 +66,12 @@ Ignore location type for locations, only consider project type
 - if all cases, locations visited still changes.
 
 
+tasks
+- scoring depending on project type
+  - use tracking API to send with 0 points
+  - need to change the way the points are aggrevated in [id]/index
+- When location is just visited, don't let bottom screen display it is visited
+- UI
+  - generate UI using chatgpt then copy
+
+
