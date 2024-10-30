@@ -9,7 +9,7 @@ export default function NearbyLocation({ nearbyLocation }: { nearbyLocation: Loc
       <SafeAreaView style={styles.nearbyLocationSafeAreaView}>
         <View style={styles.nearbyLocationView}>
           <Text style={styles.nearbyLocationText}>
-            {nearbyLocation.location}
+            Near: {nearbyLocation.location}
           </Text>
           {nearbyLocation.distance.nearby && (
             <Text

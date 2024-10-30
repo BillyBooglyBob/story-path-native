@@ -1,7 +1,8 @@
-import { StyleSheet, Appearance } from "react-native";
+import { StyleSheet, Appearance, SafeAreaView } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { useProject } from "../../../context/ProjectContext";
 import NearbyLocation from "../../../components/NearbyLocation";
+import LocationPopUp from "../../../components/LocationPopUp";
 
 // Get light or dark mode
 const colorScheme = Appearance.getColorScheme();
@@ -10,7 +11,7 @@ export default function MapScreen() {
   // Setup state for map data
   // Retrieve user's current location
   const projectContext = useProject();
-  const { locationPermission, mapState } = projectContext || {};
+  const { locationPermission, mapState, locationOverlay } = projectContext || {};
 
   if (!locationPermission || !mapState) {
     return null; // or you can return a loading spinner or some other fallback UI
@@ -56,6 +57,9 @@ export default function MapScreen() {
       </MapView>
       {/* If current nearby location is within 100m of user, will say so */}
       <NearbyLocation nearbyLocation={mapState.nearbyLocation} />
+      {locationOverlay?.newLocationVisited.newLocationVisited && (
+        <LocationPopUp />
+      )}
     </>
   );
 }

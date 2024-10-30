@@ -25,7 +25,7 @@ type ProjectContextType = {
       newLocationVisited: boolean;
       newLocation: ProjectLocation;
     };
-    setNewLocationVisited: (location: Location) => void;
+    setNewLocationVisited: (location: ProjectLocation) => void;
     setLocationAlreadyVisited: () => void;
   };
 };
@@ -42,43 +42,6 @@ export function ProjectProvider({
 }) {
   const userContext = useUser();
   const username = userContext?.userState.username;
-
-  // Create additional state to manage location tracking and
-  // set locationVisit to true, so it overlays over the entire screen
-  // and another button to close the overlay
-  const [newLocationVisited, setLocationVisited] = useState({
-    newLocationVisited: false,
-    newLocation: {} as ProjectLocation,
-  });
-
-  // Location not visited yet, set it as visited
-  const setNewLocationVisited = (location: Location) => {
-    // Extract location content for the new location
-    const locationContent = locationQuery.data?.find(
-      (loc) => loc.id === location.id
-    );
-    setLocationVisited({
-      newLocationVisited: true,
-      newLocation: locationContent ?? ({} as ProjectLocation),
-    });
-
-    // Call the mutation function to mark the location as visited
-    setLocationVisitedMutation.mutate(location);
-  };
-
-  // location visited already, set it as false
-  const setLocationAlreadyVisited = () => {
-    setLocationVisited({
-      newLocationVisited: false,
-      newLocation: {} as ProjectLocation,
-    });
-  };
-
-  const locationOverlay = {
-    newLocationVisited,
-    setNewLocationVisited,
-    setLocationAlreadyVisited,
-  };
 
   // RETRIEVE DATA FROM API
   const {
@@ -106,6 +69,43 @@ export function ProjectProvider({
   project?.homescreen_display === HOMESCREEN_DISPLAY_OPTIONS.allLocations
     ? (visibleLocations = allLocations)
     : (visibleLocations = visitedLocations);
+
+  // Create additional state to manage location tracking and
+  // set locationVisit to true, so it overlays over the entire screen
+  // and another button to close the overlay
+  const [newLocationVisited, setLocationVisited] = useState({
+    newLocationVisited: false,
+    newLocation: {} as ProjectLocation,
+  });
+
+  // Location not visited yet, set it as visited
+  const setNewLocationVisited = (location: ProjectLocation) => {
+    // Extract location content for the new location
+    // const locationContent = locationQuery.data?.find(
+    //   (loc) => loc.id === location.id
+    // );
+    setLocationVisited({
+      newLocationVisited: true,
+      newLocation: location ?? ({} as ProjectLocation),
+    });
+
+    // Call the mutation function to mark the location as visited
+    setLocationVisitedMutation.mutate(location);
+  };
+
+  // location visited already, set it as false
+  const setLocationAlreadyVisited = () => {
+    setLocationVisited({
+      newLocationVisited: false,
+      newLocation: {} as ProjectLocation,
+    });
+  };
+
+  const locationOverlay = {
+    newLocationVisited,
+    setNewLocationVisited,
+    setLocationAlreadyVisited,
+  };
 
   // Keep track of the geographical info of the user and project
   // Request the user for location permission when initialised
@@ -216,7 +216,12 @@ export function ProjectProvider({
               ) {
                 console.log("Location not visited yet!");
                 // Mark location as visited
-                locationOverlay.setNewLocationVisited(mapState.nearbyLocation);
+                const locationToVisit = allLocations?.find((location) => {
+                  return location.id === mapState.nearbyLocation.id;
+                });
+                if (locationToVisit) {
+                  locationOverlay.setNewLocationVisited(locationToVisit);
+                }
               }
             }
           }
@@ -230,7 +235,7 @@ export function ProjectProvider({
         locationSubscription.remove();
       }
     };
-  }, [locationPermission, mapState.locations]);
+  }, [locationPermission, mapState.locations, mapState.nearbyLocation]);
 
   // Pass both project and locations data along with their status/error info
   const contextValue = {

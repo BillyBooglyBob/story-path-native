@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   Text,
   StyleSheet,
   View,
@@ -10,16 +9,18 @@ import { useProject } from "../context/ProjectContext";
 import WebView from "react-native-webview";
 import { ProjectLocation } from "../lib/types";
 
-const LocationPopUp = ({ handleClose }: { handleClose: () => void }) => {
+const LocationPopUp = () => {
   const projectContext = useProject();
   const { locationOverlay } = projectContext || {};
   const locationContent =
     locationOverlay?.newLocationVisited?.newLocation || ({} as ProjectLocation);
 
-  console.log(locationContent.location_content);
+  const closeOverlay = () => {
+    locationOverlay?.setLocationAlreadyVisited();
+  };
 
   return (
-    <TouchableWithoutFeedback onPress={handleClose}>
+    <TouchableWithoutFeedback onPress={closeOverlay}>
       <View style={styles.overlayContainer}>
         <View style={styles.overlayContent}>
           <Text style={styles.overlayText}>
@@ -37,7 +38,7 @@ const LocationPopUp = ({ handleClose }: { handleClose: () => void }) => {
           ) : (
             <Text style={styles.overlayText}>No content available</Text>
           )}
-          <Button onPress={handleClose} title="Close" />
+          <Button onPress={closeOverlay} title="Close" />
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -52,8 +53,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   overlayContent: {
-    width: 300,
-    height: 400,
+    width: 400,
+    height: 600,
     padding: 20,
     backgroundColor: "white",
     borderRadius: 10,
@@ -71,8 +72,8 @@ const styles = StyleSheet.create({
   },
   webview: {
     marginTop: 20,
-    maxHeight: 200,
-    width: 300,
+    maxHeight: 500,
+    width: 400,
     flex: 1,
   },
 });

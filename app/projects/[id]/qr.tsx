@@ -14,7 +14,39 @@ export default function QRScreen() {
 
   // Get location data from the project context
   const projectContext = useProject();
-  const { mapState, visitedLocations, locationOverlay } = projectContext || {};
+  const { allLocations, visitedLocations, locationOverlay } = projectContext || {};
+
+  // Handle when barcode is scanned
+  const handleBarCodeScanned = ({ data }: { data: string }) => {
+    setQrData((prev) => ({
+      ...prev,
+      scanned: true,
+      scannedData: data,
+    }));
+
+    const [_, locationId] = data.split(",");
+    const locationIdNumber = Number(locationId);
+
+    const visitedAlready = !(visitedLocations || []).some(
+      (location) => location.id === locationIdNumber
+    );
+
+    const location = allLocations?.find(
+      (location) => location.id === locationIdNumber
+    );
+
+    visitedAlready
+      ? location && locationOverlay?.setNewLocationVisited(location)
+      : locationOverlay?.setLocationAlreadyVisited();
+  };
+
+  // Handle scan again, reset scanned state
+  const setScannedFalse = () => {
+    setQrData({
+      scanned: false,
+      scannedData: "",
+    });
+  };
 
   // Camera permission still loading
   if (!permission) {
@@ -37,44 +69,6 @@ export default function QRScreen() {
     );
   }
 
-  // Handle when barcode is scanned
-  const handleBarCodeScanned = ({ data }: { data: string }) => {
-    setQrData((prev) => ({
-      ...prev,
-      scanned: true,
-      scannedData: data,
-    }));
-
-    const [_, locationId] = data.split(",");
-    const locationIdNumber = Number(locationId);
-
-    const visitedAlready = !(visitedLocations || []).some(
-      (location) => location.id === locationIdNumber
-    );
-
-    const location = mapState?.locations?.find(
-      (location) => location.id === locationIdNumber
-    );
-
-    visitedAlready
-      ? location && locationOverlay?.setNewLocationVisited(location)
-      : locationOverlay?.setLocationAlreadyVisited();
-  };
-
-  // Handle scan again, reset scanned state
-  const setScannedFalse = () => {
-    setQrData({
-      scanned: false,
-      scannedData: "",
-    });
-  };
-
-  // Close the overlay
-  const closeOverlay = () => {
-    locationOverlay?.setLocationAlreadyVisited();
-    setScannedFalse();
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <CameraView
@@ -93,7 +87,7 @@ export default function QRScreen() {
       )}
       {/* If new location visited, display the content as overlay */}
       {locationOverlay?.newLocationVisited.newLocationVisited && (
-        <LocationPopUp handleClose={closeOverlay}/>
+        <LocationPopUp/>
       )}
     </SafeAreaView>
   );

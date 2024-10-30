@@ -3,6 +3,7 @@ import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 import { useProject } from "../../../context/ProjectContext";
 import { SCORING_OPTIONS } from "../../../lib/constants";
+import LocationPopUp from "../../../components/LocationPopUp";
 
 export default function ProjectDetailsScreen() {
   const projectContext = useProject();
@@ -12,6 +13,7 @@ export default function ProjectDetailsScreen() {
     visitedLocations,
     locationStatus,
     locationError,
+    locationOverlay,
   } = projectContext || {};
 
   let totalScore =
@@ -44,6 +46,15 @@ export default function ProjectDetailsScreen() {
             : `${userScore} / ${totalScore}`}
         </Text>
       </View>
+      <View>
+        <Text>Visited Locations</Text>
+        {visitedLocations?.map((location) => (
+          <Text key={location.id}>{location.location_name}</Text>
+        ))}
+      </View>
+      {locationOverlay?.newLocationVisited.newLocationVisited && (
+        <LocationPopUp />
+      )}
     </SafeAreaView>
   );
 }
