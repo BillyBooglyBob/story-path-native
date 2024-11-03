@@ -1,6 +1,5 @@
 import { Link } from "expo-router";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-
 import { useProject } from "../../../context/ProjectContext";
 import { SCORING_OPTIONS } from "../../../lib/constants";
 import LocationPopUp from "../../../components/LocationPopUp";
@@ -14,6 +13,7 @@ export default function ProjectDetailsScreen() {
     locationStatus,
     locationError,
     locationOverlay,
+    visitedLocationIds
   } = projectContext || {};
 
   let totalScore =
@@ -22,8 +22,8 @@ export default function ProjectDetailsScreen() {
     }, 0) ?? 0;
 
   let userScore =
-    visitedLocations?.reduce((acc, location) => {
-      return acc + location.score_points;
+    visitedLocationIds?.reduce((acc, location) => {
+      return acc + location.points;
     }, 0) ?? 0;
 
   return (
@@ -33,8 +33,6 @@ export default function ProjectDetailsScreen() {
       <Link href="/projects">Back</Link>
       <Text>Project Title: {project?.title}</Text>
       <Text>Project Description: {project?.description}</Text>
-      {/* Webviews content changes dynamically based on the location */}
-      {/* <WebView style={styles.webView} originWhitelist={["*"]} /> */}
       <View>
         <Text>
           Locations visited: {visitedLocations?.length}/{allLocations?.length}

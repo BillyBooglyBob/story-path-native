@@ -32,23 +32,26 @@ export const useProjectData = (projectId: number, username: string) => {
     queryFn: () => getLocationsVisitedByUser(Number(projectId), username ?? ""),
   });
 
-  const createTrackingFn = async (location: ProjectLocation) => {
-    // const newLocation: ProjectLocation = locationQuery.data?.find(
-    //   (loc) => loc.id === location.id
-    // ) || {
-    //   location_name: "",
-    //   location_trigger: "",
-    //   location_position: "",
-    //   score_points: 0,
-    //   project_id: Number(projectId),
-    //   location_content: "",
-    //   username: username ?? "",
-    // };
-    return createTracking(Number(projectId), location, username);
+  const createTrackingFn = async (
+    location: ProjectLocation,
+    locationScored: boolean
+  ) => {
+    return createTracking(
+      Number(projectId),
+      location,
+      username,
+      locationScored
+    );
   };
 
   const setLocationVisitedMutation = useMutation({
-    mutationFn: createTrackingFn,
+    mutationFn: ({
+      location,
+      locationScored,
+    }: {
+      location: ProjectLocation;
+      locationScored: boolean;
+    }) => createTrackingFn(location, locationScored),
     onSuccess: () => {
       console.log("Location marked as visited");
 

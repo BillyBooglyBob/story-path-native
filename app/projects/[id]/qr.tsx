@@ -3,6 +3,7 @@ import { useState } from "react";
 import { SafeAreaView, Text, StyleSheet, View, Button } from "react-native";
 import { useProject } from "../../../context/ProjectContext";
 import LocationPopUp from "../../../components/LocationPopUp";
+import { LOCATION_TRIGGER_OPTIONS } from "../../../lib/constants";
 
 export default function QRScreen() {
   // States to store permission of QR data
@@ -14,7 +15,8 @@ export default function QRScreen() {
 
   // Get location data from the project context
   const projectContext = useProject();
-  const { allLocations, visitedLocations, locationOverlay } = projectContext || {};
+  const { allLocations, visitedLocations, locationOverlay } =
+    projectContext || {};
 
   // Handle when barcode is scanned
   const handleBarCodeScanned = ({ data }: { data: string }) => {
@@ -35,8 +37,15 @@ export default function QRScreen() {
       (location) => location.id === locationIdNumber
     );
 
+    // Check if location allows scoring by qr code
+    const locationScored =
+      location?.location_trigger ===
+        LOCATION_TRIGGER_OPTIONS.LocationEntryAndQRCode ||
+      location?.location_trigger === LOCATION_TRIGGER_OPTIONS.QRCode;
+
     visitedAlready
-      ? location && locationOverlay?.setNewLocationVisited(location)
+      ? location &&
+        locationOverlay?.setNewLocationVisited(location, locationScored)
       : locationOverlay?.setLocationAlreadyVisited();
   };
 
@@ -87,7 +96,7 @@ export default function QRScreen() {
       )}
       {/* If new location visited, display the content as overlay */}
       {locationOverlay?.newLocationVisited.newLocationVisited && (
-        <LocationPopUp/>
+        <LocationPopUp />
       )}
     </SafeAreaView>
   );

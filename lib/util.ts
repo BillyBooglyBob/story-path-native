@@ -140,14 +140,15 @@ export async function getLocationsVisitedByUser(
 export async function createTracking(
   projectId: number,
   location: ProjectLocation,
-  username: string
+  username: string,
+  locationScored: boolean
 ): Promise<object> {
   const { id: locationId, score_points } = location;
   const tracking: LocationTracking = {
     project_id: projectId,
     location_id: locationId ?? 0,
     participant_username: username,
-    points: score_points,
+    points: locationScored ? score_points : 0,  // Count the score of the location conditionally
   };
   console.log(tracking);
   return apiRequest("/tracking", "POST", tracking);

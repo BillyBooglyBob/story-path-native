@@ -2,12 +2,20 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as ExpoLocation from "expo-location";
 import { calculateDistance } from "../lib/util"; // Assume these functions fetch the data
-import { MapState, Project, ProjectLocation, Location } from "../lib/types";
-import { HOMESCREEN_DISPLAY_OPTIONS } from "../lib/constants";
+import {
+  MapState,
+  Project,
+  ProjectLocation,
+  Location,
+  LocationTracking,
+} from "../lib/types";
+import {
+  HOMESCREEN_DISPLAY_OPTIONS,
+  LOCATION_TRIGGER_OPTIONS,
+} from "../lib/constants";
 import { useUser } from "./UserContext";
 import { useProjectData } from "../hooks/useProjectData";
 import { useLocationPermission } from "../hooks/useLocationPermission";
-import { UseMutationResult } from "@tanstack/react-query";
 
 // Define the shape of your context
 type ProjectContextType = {
@@ -25,9 +33,13 @@ type ProjectContextType = {
       newLocationVisited: boolean;
       newLocation: ProjectLocation;
     };
-    setNewLocationVisited: (location: ProjectLocation) => void;
+    setNewLocationVisited: (
+      location: ProjectLocation,
+      locationScored: boolean
+    ) => void;
     setLocationAlreadyVisited: () => void;
   };
+  visitedLocationIds: LocationTracking[] | undefined;
 };
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -79,7 +91,10 @@ export function ProjectProvider({
   });
 
   // Location not visited yet, set it as visited
-  const setNewLocationVisited = (location: ProjectLocation) => {
+  const setNewLocationVisited = (
+    location: ProjectLocation,
+    locationScored: boolean
+  ) => {
     // Extract location content for the new location
     // const locationContent = locationQuery.data?.find(
     //   (loc) => loc.id === location.id
@@ -90,7 +105,7 @@ export function ProjectProvider({
     });
 
     // Call the mutation function to mark the location as visited
-    setLocationVisitedMutation.mutate(location);
+    setLocationVisitedMutation.mutate({ location, locationScored });
   };
 
   // location visited already, set it as false
@@ -220,7 +235,13 @@ export function ProjectProvider({
                   return location.id === mapState.nearbyLocation.id;
                 });
                 if (locationToVisit) {
-                  locationOverlay.setNewLocationVisited(locationToVisit);
+                  // Check if location can be scored by location trigger
+                  const locationScored =
+                    locationToVisit.location_trigger ===
+                      LOCATION_TRIGGER_OPTIONS.locationEntry ||
+                    locationToVisit.location_trigger ===
+                      LOCATION_TRIGGER_OPTIONS.LocationEntryAndQRCode;
+                  locationOverlay.setNewLocationVisited(locationToVisit, locationScored);
                 }
               }
             }
@@ -246,6 +267,7 @@ export function ProjectProvider({
     visitedLocations,
     locationStatus: locationQuery.status,
     locationError: locationQuery.error,
+    visitedLocationIds: locationTrackingQuery.data,
     mapState,
     locationPermission,
     locationOverlay,
