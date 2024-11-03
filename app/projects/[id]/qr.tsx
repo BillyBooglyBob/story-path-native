@@ -1,6 +1,12 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
-import { SafeAreaView, Text, StyleSheet, View, Button } from "react-native";
+import {
+  SafeAreaView,
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { useProject } from "../../../context/ProjectContext";
 import LocationPopUp from "../../../components/LocationPopUp";
 import { LOCATION_TRIGGER_OPTIONS } from "../../../lib/constants";
@@ -73,7 +79,9 @@ export default function QRScreen() {
         <Text style={styles.message}>
           We need your permission to show the camera
         </Text>
-        <Button onPress={requestPermission} title="Grant permission" />
+        <TouchableOpacity onPress={requestPermission} style={styles.button}>
+          <Text style={styles.buttonText}>Grant permission</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -91,7 +99,9 @@ export default function QRScreen() {
               ? "New location visited"
               : "Location already visited"}
           </Text>
-          <Button title="Press to scan again" onPress={setScannedFalse} />
+          <TouchableOpacity onPress={setScannedFalse} style={styles.button}>
+            <Text style={styles.buttonText}>Press to scan again</Text>
+          </TouchableOpacity>
         </View>
       )}
       {/* If new location visited, display the content as overlay */}
@@ -114,32 +124,32 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: "row",
-    backgroundColor: "transparent",
-    margin: 64,
-  },
   button: {
-    flex: 1,
-    alignSelf: "flex-end",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderColor: "#878f9a",
+    borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: "transparent",
     alignItems: "center",
+    marginTop: 20,
   },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
+  buttonText: {
     color: "white",
+    fontSize: 16,
   },
   scanResultContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "white",
+    backgroundColor: "#2f3136",
     padding: 15,
   },
   scanResultText: {
     fontSize: 16,
     marginBottom: 10,
+    color: "white",
+    textAlign: "center",
   },
 });
