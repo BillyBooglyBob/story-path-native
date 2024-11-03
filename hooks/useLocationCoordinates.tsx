@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react'
-import { ProjectLocation, Location } from '../lib/types';
+import React, { useEffect, useState } from "react";
+import { ProjectLocation, Location } from "../lib/types";
 
 const useLocationCoordinates = (locations: ProjectLocation[]) => {
-  const [locationCoordinates, setLocationCoordinates] = useState<Location[]>([]);
+  const [locationCoordinates, setLocationCoordinates] = useState<Location[]>(
+    []
+  );
 
   useEffect(() => {
     if (locations) {
@@ -27,10 +29,11 @@ const useLocationCoordinates = (locations: ProjectLocation[]) => {
         };
       });
 
-      setLocationCoordinates(((prev) => [...prev, ...updatedLocations])); 
+      setLocationCoordinates((prev) => [...prev, ...updatedLocations]);
     }
   }, [locations]);
-  return locationCoordinates;
-}
 
-export default useLocationCoordinates
+  return locationCoordinates;
+};
+
+export default useLocationCoordinates;

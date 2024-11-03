@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   SafeAreaView,
   Text,
@@ -6,8 +6,8 @@ import {
   StyleSheet,
   View,
   Dimensions,
-  Button,
   TextInput,
+  TouchableOpacity,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useUser } from "../context/UserContext";
@@ -34,11 +34,6 @@ export default function ProfileScreen() {
     }
   }
 
-  // Function to remove the selected photo
-  async function handleRemovePress() {
-    setUserState?.((prevState) => ({ ...prevState, uri: "" }));
-  }
-
   // Check if a photo has been selected
   const hasPhoto = Boolean(userState?.uri);
 
@@ -46,16 +41,24 @@ export default function ProfileScreen() {
   function Photo() {
     if (hasPhoto) {
       return (
-        <View style={styles.photoFullView}>
-          <Image
-            style={styles.photoFullImage}
-            resizeMode="cover"
-            source={{ uri: userState?.uri }}
-          />
-        </View>
+        <TouchableOpacity onPress={handleChangePress}>
+          <View style={styles.photoFullView}>
+            <Image
+              style={styles.photoFullImage}
+              resizeMode="cover"
+              source={{ uri: userState?.uri }}
+            />
+          </View>
+        </TouchableOpacity>
       );
     } else {
-      return <View style={styles.photoEmptyView} />;
+      return (
+        <TouchableOpacity onPress={handleChangePress}>
+          <View style={styles.photoEmptyView}>
+            <Text style={styles.photoEmptyViewText}>Select a photo</Text>
+          </View>
+        </TouchableOpacity>
+      );
     }
   }
 
@@ -71,23 +74,16 @@ export default function ProfileScreen() {
     <SafeAreaView>
       <View style={styles.container}>
         <Photo />
-        <View style={styles.buttonView}>
-          <Button
-            onPress={handleChangePress}
-            title={hasPhoto ? "Change Photo" : "Add Photo"}
+        <View>
+          <Text style={styles.inputHeader}>Username</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your username"
+            placeholderTextColor="#ccc"
+            value={userState?.username}
+            onChangeText={handleUsernameChange}
           />
-          {hasPhoto && (
-            <Button onPress={handleRemovePress} title="Remove Photo" />
-          )}
         </View>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your username"
-          placeholderTextColor="#ccc"
-          value={userState?.username}
-          onChangeText={handleUsernameChange}
-        />
       </View>
     </SafeAreaView>
   );
@@ -100,11 +96,11 @@ const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-  },
-  icon: {
-    width: 100, // Adjust size as needed
-    height: 100, // Adjust size as needed
-    marginBottom: 20,
+    paddingTop: 40,
+    backgroundColor: "#202225",
+    height: "100%",
+    display: "flex",
+    gap: 40,
   },
   text: {
     color: "#fff", // White text for contrast
@@ -115,30 +111,34 @@ const styles = StyleSheet.create({
   },
   photoEmptyView: {
     borderWidth: 3,
-    borderRadius: 10,
+    borderRadius: 100,
     borderColor: "#999",
     borderStyle: "dashed",
     width: "100%",
     height: height / 2,
     marginBottom: 20,
   },
+  photoEmptyViewText: {
+    color: "#999",
+    fontSize: 24,
+    textAlign: "center",
+    marginTop: height / 4.5,
+  },
   photoFullImage: {
     width: "100%",
     height: height / 2,
-    borderRadius: 10,
+    borderRadius: 100,
   },
-  buttonView: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+  inputHeader: {
+    color: "#878f9a",
+    textTransform: "uppercase",
   },
   input: {
     height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     color: "#fff", // Text color for input
-    marginTop: 20,
+    marginTop: 10,
     backgroundColor: "#333", // Dark background for input
   },
 });

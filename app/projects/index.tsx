@@ -1,9 +1,10 @@
 import { Link } from "expo-router";
-import { SafeAreaView, Text, StyleSheet, View } from "react-native";
+import { SafeAreaView, Text, StyleSheet, View, FlatList } from "react-native";
 import { useProjectList } from "../../context/ProjectsContext";
+import { MaterialIcons } from "@expo/vector-icons";
+
 export default function ProjectsScreen() {
   const projectListContext = useProjectList();
-
 
   const { projects, status, error, participantQueries } =
     projectListContext || {};
@@ -19,26 +20,31 @@ export default function ProjectsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {projects?.map((project, index) => {
-        // Ensure unpublished projects are not shown
-        if (!project.is_published) return null;
-
-        const participantQuery = (participantQueries ?? [])[index];
-        const participantsCount =
-          participantQuery?.data?.[0]?.number_participants || "0";
-
-        return (
-          <Link key={project.id} href={`/projects/${project.id}`}>
-            <View style={styles.projectRow}>
-              <Text style={styles.projectTitle}>{project.title}</Text>
-              <View style={styles.participantsBubble}>
-                <Text style={styles.participantsText}>{participantsCount}</Text>
+      <Text style={styles.headerText}>Published Projects:</Text>
+      <FlatList
+        data={projects}
+        keyExtractor={(project) => (project.id ?? "").toString()}
+        renderItem={({ item, index }) => (
+          <View>
+            <Link style={styles.item} href={`/projects/${item.id}`}>
+              <View style={styles.itemContent}>
+                <View>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <Text style={styles.participants}>
+                    Participants:{" "}
+                    {participantQueries?.[index]?.data?.[0]
+                      ?.number_participants || "0"}
+                  </Text>
+                </View>
               </View>
-              
-            </View>
-          </Link>
-        );
-      })}
+            </Link>
+            {projects && index < projects.length - 1 && (
+              <View style={styles.separator} />
+            )}
+          </View>
+        )}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 }
@@ -47,45 +53,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#1a1a1a", // Dark background for the screen
+    backgroundColor: "#202225",
+    display: "flex",
   },
   headerText: {
-    color: "#fff", // White text for contrast
+    color: "#878f9a",
     fontSize: 22,
     marginBottom: 20,
+    paddingHorizontal: 10,
   },
-  projectRow: {
-    flexDirection: "row",
+  item: {
+    padding: 10,
+    marginVertical: 10,
+    flex: 1,
+    backgroundColor: "#4f545c",
+    display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#333", // Dark gray background for rows
-    padding: 15,
-    marginBottom: 10,
     borderRadius: 10,
   },
-  projectTitle: {
-    color: "#fff", // White text for contrast
+  itemContent: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  title: {
     fontSize: 18,
-    flex: 1,
+    color: "#fff",
   },
-  projectDescription: {
-    color: "#aaa", // Lighter gray for description
-    fontSize: 14,
-    flex: 2,
-    paddingRight: 10,
+  participants: {
+    color: "#878f9a",
   },
-  participantsBubble: {
-    backgroundColor: "#f08d49", // Bubble color (you can change this)
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 40,
-  },
-  participantsText: {
-    color: "#fff", // White text for the bubble
-    fontWeight: "bold",
-    fontSize: 16,
+  separator: {
+    borderBottomColor: "#878f9a",
+    borderBottomWidth: 1,
+    marginVertical: 10,
   },
 });

@@ -10,13 +10,13 @@ const CustomDrawer = (props: any) => {
   const userState = userContext?.userState;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#202225" }}>
       <DrawerContentScrollView
         {...props}
         scrollEnabled={false}
         contentContainerStyle={{ flexGrow: 1 }} // Ensure the content takes up all available space
       >
-        <View style={{ alignItems: "center" }}>
+        <View style={{ alignItems: "center", backgroundColor: "#2f3136", marginBottom: 20 }}>
           <Image
             source={
               userState?.uri
@@ -36,13 +36,13 @@ const CustomDrawer = (props: any) => {
               fontSize: 18,
               paddingTop: 10,
               paddingBottom: 10,
-              color: "black",
+              color: "white",
             }}
           >
             {userState?.username}
           </Text>
         </View>
-        <View style={{ backgroundColor: "white", flex: 1 }}>
+        <View style={{ flex: 1 }}>
           <DrawerItemList {...props} />
         </View>
       </DrawerContentScrollView>

@@ -11,7 +11,17 @@ export default function ProjectTabs() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ProjectProvider projectId={projectId}>
-        <Tabs screenOptions={{ headerShown: false }}>
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: {
+              backgroundColor: "#1c1c1c", // Dark background color
+              
+            },
+            tabBarActiveTintColor: "#ff6666", // Light red color for selected icon
+            tabBarInactiveTintColor: "#ffffff", // White color for unselected icons
+          }}
+        >
           <Tabs.Screen
             name="index"
             options={{

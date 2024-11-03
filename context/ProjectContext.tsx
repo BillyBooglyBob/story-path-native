@@ -39,7 +39,7 @@ type ProjectContextType = {
     ) => void;
     setLocationAlreadyVisited: () => void;
   };
-  visitedLocationIds: LocationTracking[] | undefined;
+  userScore: number;
 };
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -70,6 +70,10 @@ export function ProjectProvider({
 
   // Get visited locations
   const visitedLocationIds = locationTrackingQuery.data;
+  const userScore =
+    visitedLocationIds?.reduce((acc, location) => {
+      return acc + location.points;
+    }, 0) ?? 0;
   visitedLocations = allLocations?.filter((location) => {
     return visitedLocationIds?.some(
       (visitedLocationId) => visitedLocationId.location_id === location.id
@@ -241,7 +245,10 @@ export function ProjectProvider({
                       LOCATION_TRIGGER_OPTIONS.locationEntry ||
                     locationToVisit.location_trigger ===
                       LOCATION_TRIGGER_OPTIONS.LocationEntryAndQRCode;
-                  locationOverlay.setNewLocationVisited(locationToVisit, locationScored);
+                  locationOverlay.setNewLocationVisited(
+                    locationToVisit,
+                    locationScored
+                  );
                 }
               }
             }
@@ -267,7 +274,7 @@ export function ProjectProvider({
     visitedLocations,
     locationStatus: locationQuery.status,
     locationError: locationQuery.error,
-    visitedLocationIds: locationTrackingQuery.data,
+    userScore,
     mapState,
     locationPermission,
     locationOverlay,

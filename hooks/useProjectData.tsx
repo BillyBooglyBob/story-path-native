@@ -9,7 +9,6 @@ import {
   LocationTracking,
   Project,
   ProjectLocation,
-  Location,
 } from "../lib/types";
 
 export const useProjectData = (projectId: number, username: string) => {
