@@ -1,5 +1,5 @@
 // ProjectContext.js
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import * as ExpoLocation from "expo-location";
 import { calculateDistance } from "../lib/util"; // Assume these functions fetch the data
 import {
@@ -65,8 +65,8 @@ export function ProjectProvider({
 
   // GET LOCATIONS DATA
   const allLocations = locationQuery.data;
-  let visitedLocations: ProjectLocation[] | undefined = [];
-  let visibleLocations: ProjectLocation[] | undefined = [];
+  // let visitedLocations: ProjectLocation[] | undefined = [];
+  // let visibleLocations: ProjectLocation[] | undefined = [];
 
   // Get visited locations
   const visitedLocationIds = locationTrackingQuery.data;
@@ -74,17 +74,37 @@ export function ProjectProvider({
     visitedLocationIds?.reduce((acc, location) => {
       return acc + location.points;
     }, 0) ?? 0;
-  visitedLocations = allLocations?.filter((location) => {
+  const visitedLocations = allLocations?.filter((location) => {
     return visitedLocationIds?.some(
       (visitedLocationId) => visitedLocationId.location_id === location.id
     );
   });
 
-  // Get visible locations based on project setting
-  const project = projectQuery.data?.[0];
-  project?.homescreen_display === HOMESCREEN_DISPLAY_OPTIONS.allLocations
-    ? (visibleLocations = allLocations)
-    : (visibleLocations = visitedLocations);
+  // // Get visible locations based on project setting
+  // const project = projectQuery.data?.[0];
+  // project?.homescreen_display === HOMESCREEN_DISPLAY_OPTIONS.allLocations
+  //   ? (visibleLocations = allLocations)
+  //   : (visibleLocations = visitedLocations);
+
+
+  // Memoize `visitedLocations` to prevent re-computing if dependencies do not change
+  // const visitedLocations = useMemo(
+  //   () =>
+  //     allLocations?.filter((location) =>
+  //       visitedLocationIds?.some(
+  //         (visitedLocationId) => visitedLocationId.location_id === location.id
+  //       )
+  //     ),
+  //   [allLocations, visitedLocationIds]
+  // );
+
+  const visibleLocations = useMemo(() => {
+    const project = projectQuery.data?.[0];
+    return project?.homescreen_display ===
+      HOMESCREEN_DISPLAY_OPTIONS.allLocations
+      ? allLocations
+      : visitedLocations;
+  }, [projectQuery.data, allLocations, visitedLocations]);
 
   // Create additional state to manage location tracking and
   // set locationVisit to true, so it overlays over the entire screen

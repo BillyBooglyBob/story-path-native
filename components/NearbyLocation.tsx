@@ -3,13 +3,20 @@
 import { StyleSheet, View, SafeAreaView, Text } from "react-native";
 import { Location } from "../lib/types";
 
-export default function NearbyLocation({ nearbyLocation }: { nearbyLocation: Location }) {
+export default function NearbyLocation({
+  nearbyLocation,
+}: {
+  nearbyLocation: Location;
+}) {
   if (typeof nearbyLocation.location != "undefined") {
     return (
       <SafeAreaView style={styles.nearbyLocationSafeAreaView}>
         <View style={styles.nearbyLocationView}>
           <Text style={styles.nearbyLocationText}>
-            Near: {nearbyLocation.location}
+            Near:{" "}
+            {nearbyLocation.location
+              ? nearbyLocation.location
+              : "No Available Locations"}
           </Text>
           {nearbyLocation.distance.nearby && (
             <Text

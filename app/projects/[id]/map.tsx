@@ -1,4 +1,4 @@
-import { StyleSheet, Appearance, SafeAreaView } from "react-native";
+import { StyleSheet, Appearance, SafeAreaView, Text } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { useProject } from "../../../context/ProjectContext";
 import NearbyLocation from "../../../components/NearbyLocation";
@@ -11,11 +11,14 @@ export default function MapScreen() {
   // Setup state for map data
   // Retrieve user's current location
   const projectContext = useProject();
-  const { locationPermission, mapState, locationOverlay } =
-    projectContext || {};
+  const { locationPermission, mapState, locationOverlay } = projectContext || {};
 
   if (!locationPermission || !mapState) {
-    return null; // or you can return a loading spinner or some other fallback UI
+    return (
+      <SafeAreaView style={styles.fallbackContainer}>
+        <Text style={styles.fallbackText}>Map not available</Text>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -58,9 +61,7 @@ export default function MapScreen() {
       </MapView>
       {/* If current nearby location is within 100m of user, will say so */}
       <NearbyLocation nearbyLocation={mapState.nearbyLocation} />
-      {locationOverlay?.newLocationVisited.newLocationVisited && (
-        <LocationPopUp />
-      )}
+      {locationOverlay?.newLocationVisited.newLocationVisited && <LocationPopUp />}
     </>
   );
 }
@@ -69,6 +70,16 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  fallbackContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colorScheme === "dark" ? "#1c1c1e" : "#f9f9f9",
+  },
+  fallbackText: {
+    fontSize: 18,
+    color: colorScheme === "dark" ? "#ffffff" : "#333333",
   },
   nearbyLocationSafeAreaView: {
     backgroundColor: "black",

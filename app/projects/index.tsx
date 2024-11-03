@@ -1,7 +1,6 @@
 import { Link } from "expo-router";
 import { SafeAreaView, Text, StyleSheet, View, FlatList } from "react-native";
 import { useProjectList } from "../../context/ProjectsContext";
-import { MaterialIcons } from "@expo/vector-icons";
 
 export default function ProjectsScreen() {
   const projectListContext = useProjectList();
@@ -10,12 +9,18 @@ export default function ProjectsScreen() {
     projectListContext || {};
 
   if (status === "pending")
-    return <Text style={{ color: "white" }}>Loading...</Text>;
+    return (
+      <View style={styles.statusContainer}>
+        <Text style={styles.loading}>Loading...</Text>
+      </View>
+    );
   if (status === "error")
     return (
-      <Text style={{ color: "white" }}>
-        {error?.message ?? "Error has occurred"}
-      </Text>
+      <View style={styles.statusContainer}>
+        <Text style={styles.error}>
+          {error?.message ?? "Error has occurred"}
+        </Text>
+      </View>
     );
 
   return (
@@ -86,5 +91,26 @@ const styles = StyleSheet.create({
     borderBottomColor: "#878f9a",
     borderBottomWidth: 1,
     marginVertical: 10,
+  },
+  statusContainer: {
+    flex: 1,
+    height: "100%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignContent: "center",
+    alignItems: "center",
+    backgroundColor: "#202225",
+    padding: 30
+  },
+  loading: {
+    color: "white",
+    fontSize: 20,
+    flex: 1,
+  },
+  error: {
+    color: "red",
+    fontSize: 20,
+    flex: 1,
   },
 });
