@@ -74,6 +74,20 @@ export default function Layout() {
                   ),
                 }}
               />
+              <Drawer.Screen
+                name="about"
+                options={{
+                  drawerLabel: "About",
+                  headerTitle: "About",
+                  drawerIcon: ({ focused, size }) => (
+                    <Ionicons
+                      name="alert-circle-outline"
+                      size={size}
+                      color={focused ? "#b0b3b8" : "white"}
+                    />
+                  ),
+                }}
+              />
             </Drawer>
           </GestureHandlerRootView>
         </SafeAreaView>
