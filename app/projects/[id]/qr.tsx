@@ -116,10 +116,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+    backgroundColor: "#202225",
   },
   message: {
     textAlign: "center",
     paddingBottom: 10,
+    color: "white"
   },
   camera: {
     flex: 1,
@@ -133,6 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     alignItems: "center",
     marginTop: 20,
+    marginHorizontal: 20,
   },
   buttonText: {
     color: "white",

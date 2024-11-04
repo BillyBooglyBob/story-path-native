@@ -11,7 +11,7 @@ export default function MapScreen() {
   // Setup state for map data
   // Retrieve user's current location
   const projectContext = useProject();
-  const { locationPermission, mapState, locationOverlay } = projectContext || {};
+  const { locationPermission, mapState, locationOverlay, updatedLocations } = projectContext || {};
 
   if (!locationPermission || !mapState) {
     return (
@@ -20,6 +20,8 @@ export default function MapScreen() {
       </SafeAreaView>
     );
   }
+
+  console.log("Map State: ", mapState);
 
   return (
     <>
@@ -44,7 +46,7 @@ export default function MapScreen() {
           title="You are here"
           description="Your current location"
         />
-        {mapState.locations.map((location) => (
+        {updatedLocations && updatedLocations.map((location) => (
           <Circle
             key={location.id}
             center={location.coordinates}

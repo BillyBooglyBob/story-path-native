@@ -1,5 +1,11 @@
 // ProjectContext.js
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import * as ExpoLocation from "expo-location";
 import { calculateDistance } from "../lib/util"; // Assume these functions fetch the data
 import {
@@ -27,6 +33,7 @@ type ProjectContextType = {
   locationStatus: "error" | "success" | "pending";
   locationError: Error | null;
   mapState: MapState;
+  updatedLocations: Location[];
   locationPermission: boolean;
   locationOverlay: {
     newLocationVisited: {
@@ -86,7 +93,6 @@ export function ProjectProvider({
   //   ? (visibleLocations = allLocations)
   //   : (visibleLocations = visitedLocations);
 
-
   // Memoize `visitedLocations` to prevent re-computing if dependencies do not change
   // const visitedLocations = useMemo(
   //   () =>
@@ -105,6 +111,28 @@ export function ProjectProvider({
       ? allLocations
       : visitedLocations;
   }, [projectQuery.data, allLocations, visitedLocations]);
+
+  const updatedLocations: Location[] = useMemo(() => {
+    return (visibleLocations ?? []).map((location) => {
+      const [x, y] = location.location_position
+        .replace(/[()]/g, "")
+        .split(",")
+        .map(Number);
+
+      return {
+        coordinates: {
+          latitude: x,
+          longitude: y,
+        },
+        id: location.id ?? 0,
+        location: location.location_name,
+        distance: {
+          metres: 0,
+          nearby: false,
+        },
+      };
+    });
+  }, [visibleLocations]);
 
   // Create additional state to manage location tracking and
   // set locationVisit to true, so it overlays over the entire screen
@@ -174,45 +202,12 @@ export function ProjectProvider({
 
   const [mapState, setMapState] = useState<MapState>(initialMapState);
 
-  // Update the mapState when the locations data from the API changes
-  useEffect(() => {
-    if (visibleLocations) {
-      // Convert string-based latlong to object-based on each location
-      const updatedLocations: Location[] = visibleLocations.map((location) => {
-        const [x, y] = location.location_position
-          .replace(/[()]/g, "")
-          .split(",")
-          .map(Number);
-
-        return {
-          coordinates: {
-            latitude: x,
-            longitude: y,
-          },
-          id: location.id ?? 0,
-          location: location.location_name,
-          distance: {
-            metres: 0,
-            nearby: false,
-          },
-        };
-      });
-
-      setMapState((prevState) => {
-        return {
-          ...prevState,
-          locations: updatedLocations,
-        };
-      });
-    }
-  }, [visibleLocations]);
-
   // Update user location and nearest location
   useEffect(() => {
     let locationSubscription: ExpoLocation.LocationSubscription | null = null;
 
     // Ensure location permission and locations data are available
-    if (locationPermission && mapState.locations.length > 0) {
+    if (locationPermission && updatedLocations.length > 0) {
       (async () => {
         // Start watching the user's position
         locationSubscription = await ExpoLocation.watchPositionAsync(
@@ -231,7 +226,7 @@ export function ProjectProvider({
 
             const updatedNearbyLocation = calculateDistance(
               updatedUserLocation,
-              mapState.locations
+              updatedLocations
             );
 
             setMapState((prevState) => ({
@@ -242,36 +237,6 @@ export function ProjectProvider({
 
             console.log("User location updated", updatedUserLocation);
             console.log("Nearby location updated", updatedNearbyLocation);
-
-            // Check if user is within radius of nearby location
-            // If so, mark location as visited if it is not visited already
-            if (mapState.nearbyLocation.distance.nearby) {
-              console.log("Within radius of nearby location!");
-              // Mark location as visited if it is not visited already
-              if (
-                !visitedLocations?.some(
-                  (location) => location.id === mapState.nearbyLocation.id
-                )
-              ) {
-                console.log("Location not visited yet!");
-                // Mark location as visited
-                const locationToVisit = allLocations?.find((location) => {
-                  return location.id === mapState.nearbyLocation.id;
-                });
-                if (locationToVisit) {
-                  // Check if location can be scored by location trigger
-                  const locationScored =
-                    locationToVisit.location_trigger ===
-                      LOCATION_TRIGGER_OPTIONS.locationEntry ||
-                    locationToVisit.location_trigger ===
-                      LOCATION_TRIGGER_OPTIONS.LocationEntryAndQRCode;
-                  locationOverlay.setNewLocationVisited(
-                    locationToVisit,
-                    locationScored
-                  );
-                }
-              }
-            }
           }
         );
       })();
@@ -283,7 +248,39 @@ export function ProjectProvider({
         locationSubscription.remove();
       }
     };
-  }, [locationPermission, mapState.locations, mapState.nearbyLocation]);
+  }, [locationPermission, updatedLocations]);
+
+  // Check if user is within radius of nearby location
+  // If so, mark location as visited if it is not visited already
+  useEffect(() => {
+    if (mapState.nearbyLocation.distance.nearby) {
+      console.log("Within radius of nearby location!");
+      // Mark location as visited if it is not visited already
+      if (
+        !visitedLocations?.some(
+          (location) => location.id === mapState.nearbyLocation.id
+        )
+      ) {
+        console.log("Location not visited yet!");
+        // Mark location as visited
+        const locationToVisit = allLocations?.find((location) => {
+          return location.id === mapState.nearbyLocation.id;
+        });
+        if (locationToVisit) {
+          // Check if location can be scored by location trigger
+          const locationScored =
+            locationToVisit.location_trigger ===
+              LOCATION_TRIGGER_OPTIONS.locationEntry ||
+            locationToVisit.location_trigger ===
+              LOCATION_TRIGGER_OPTIONS.LocationEntryAndQRCode;
+          locationOverlay.setNewLocationVisited(
+            locationToVisit,
+            locationScored
+          );
+        }
+      }
+    }
+  }, [mapState.nearbyLocation, mapState.userLocation, updatedLocations]);
 
   // Pass both project and locations data along with their status/error info
   const contextValue = {
@@ -296,6 +293,7 @@ export function ProjectProvider({
     locationError: locationQuery.error,
     userScore,
     mapState,
+    updatedLocations,
     locationPermission,
     locationOverlay,
   };
