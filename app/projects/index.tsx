@@ -27,28 +27,31 @@ export default function ProjectsScreen() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.headerText}>Published Projects:</Text>
       <FlatList
-        data={projects}
-        keyExtractor={(project) => (project.id ?? "").toString()}
-        renderItem={({ item, index }) => (
-          <View>
-            <Link style={styles.item} href={`/projects/${item.id}`}>
-              <View style={styles.itemContent}>
-                <View>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.participants}>
-                    Participants:{" "}
-                    {participantQueries?.[index]?.data?.[0]
-                      ?.number_participants || "0"}
-                  </Text>
-                </View>
-              </View>
-            </Link>
-            {projects && index < projects.length - 1 && (
-              <View style={styles.separator} />
-            )}
+      data={projects?.filter((project) => project.is_published)}
+      keyExtractor={(project) => (project.id ?? "").toString()}
+      renderItem={({ item }) =>
+        !item.is_published ? null : (
+        <View>
+          <Link style={styles.item} href={`/projects/${item.id}`}>
+          <View style={styles.itemContent}>
+            <View>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.participants}>
+              Participants:{" "}
+              {participantQueries?.find(
+              (query) => query.data?.[0]?.project_id === item.id
+              )?.data?.[0]?.number_participants || "0"}
+            </Text>
+            </View>
           </View>
-        )}
-        showsVerticalScrollIndicator={false}
+          </Link>
+          {projects && projects.indexOf(item) < projects.length - 1 && (
+          <View style={styles.separator} />
+          )}
+        </View>
+        )
+      }
+      showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
@@ -101,7 +104,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     alignItems: "center",
     backgroundColor: "#202225",
-    padding: 30
+    padding: 30,
   },
   loading: {
     color: "white",

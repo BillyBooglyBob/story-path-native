@@ -72,37 +72,21 @@ export function ProjectProvider({
 
   // GET LOCATIONS DATA
   const allLocations = locationQuery.data;
-  // let visitedLocations: ProjectLocation[] | undefined = [];
-  // let visibleLocations: ProjectLocation[] | undefined = [];
 
   // Get visited locations
   const visitedLocationIds = locationTrackingQuery.data;
+
+  // Get user score
   const userScore =
     visitedLocationIds?.reduce((acc, location) => {
       return acc + location.points;
     }, 0) ?? 0;
+
   const visitedLocations = allLocations?.filter((location) => {
     return visitedLocationIds?.some(
       (visitedLocationId) => visitedLocationId.location_id === location.id
     );
   });
-
-  // // Get visible locations based on project setting
-  // const project = projectQuery.data?.[0];
-  // project?.homescreen_display === HOMESCREEN_DISPLAY_OPTIONS.allLocations
-  //   ? (visibleLocations = allLocations)
-  //   : (visibleLocations = visitedLocations);
-
-  // Memoize `visitedLocations` to prevent re-computing if dependencies do not change
-  // const visitedLocations = useMemo(
-  //   () =>
-  //     allLocations?.filter((location) =>
-  //       visitedLocationIds?.some(
-  //         (visitedLocationId) => visitedLocationId.location_id === location.id
-  //       )
-  //     ),
-  //   [allLocations, visitedLocationIds]
-  // );
 
   const visibleLocations = useMemo(() => {
     const project = projectQuery.data?.[0];
@@ -112,6 +96,7 @@ export function ProjectProvider({
       : visitedLocations;
   }, [projectQuery.data, allLocations, visitedLocations]);
 
+  // Convert location from string format into format usable by the map
   const updatedLocations: Location[] = useMemo(() => {
     return (visibleLocations ?? []).map((location) => {
       const [x, y] = location.location_position

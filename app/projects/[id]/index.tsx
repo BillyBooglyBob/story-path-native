@@ -1,5 +1,12 @@
 import { Link } from "expo-router";
-import { Image, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useProject } from "../../../context/ProjectContext";
 import { SCORING_OPTIONS } from "../../../lib/constants";
 import LocationPopUp from "../../../components/LocationPopUp";
@@ -28,43 +35,44 @@ export default function ProjectDetailsScreen() {
           <Link href="/projects">
             <Image
               source={{
-                uri: "https://png.pngtree.com/png-vector/20220623/ourmid/pngtree-back-arrow-backward-direction-previous-png-image_5198415.png"
+                uri: "https://png.pngtree.com/png-vector/20220623/ourmid/pngtree-back-arrow-backward-direction-previous-png-image_5198415.png",
               }}
               style={styles.backIcon}
             />
           </Link>
         </View>
       </View>
+
       <View style={styles.body}>
-        <View style={styles.titleContent}>
-          <View>
+        <ScrollView style={styles.child1}>
+          <View style={styles.text}>
             <Text style={styles.title}>Project Title</Text>
             <Text style={styles.description}>{project?.title}</Text>
           </View>
-          <View>
+          <View style={styles.text}>
             <Text style={styles.title}>Description</Text>
             <Text style={styles.description}>{project?.description}</Text>
           </View>
-        </View>
-        <View style={styles.detailContent}>
-          <View style={styles.detailContentDescription}>
-            <View>
+        </ScrollView>
+        <View style={styles.child2}>
+          <ScrollView style={styles.grandchild1}>
+            <View style={styles.text}>
               <Text style={styles.title}>Instructions</Text>
               <Text style={styles.description}>{project?.instructions}</Text>
             </View>
-            <View>
+            <View style={styles.text}>
               <Text style={styles.title}>Initial Clue</Text>
               <Text style={styles.description}>{project?.initial_clue}</Text>
             </View>
-          </View>
-          <View style={styles.detailContentStats}>
-            <View>
+          </ScrollView>
+          <View style={styles.grandchild2}>
+            <View style={styles.text}>
               <Text style={styles.title}>Locations Visited</Text>
               <Text style={styles.description}>
                 {visitedLocations?.length} / {allLocations?.length}
               </Text>
             </View>
-            <View>
+            <View style={styles.text}>
               <Text style={styles.title}>Score</Text>
               <Text style={styles.description}>
                 {project?.participant_scoring === SCORING_OPTIONS.notScored
@@ -75,6 +83,7 @@ export default function ProjectDetailsScreen() {
           </View>
         </View>
       </View>
+
       <View style={styles.footer}>
         <View style={styles.locationContent}>
           <Text style={styles.title}>Visited Locations</Text>
@@ -88,6 +97,12 @@ export default function ProjectDetailsScreen() {
             ))
           )}
         </View>
+        {allLocations?.map((location) => (
+          <View>
+            <Text>{location.location_name}</Text>
+            <Text>{location.location_position}</Text>
+          </View>
+        ))}
       </View>
       {locationOverlay?.newLocationVisited.newLocationVisited && (
         <LocationPopUp />
@@ -109,15 +124,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     alignSelf: "flex-start",
   },
-  body: {
-    flex: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    display: "flex",
-    padding: 10,
-    flexDirection: "row",
-    gap: 20,
-  },
   footer: {
     flex: 4,
     justifyContent: "center",
@@ -129,7 +135,7 @@ const styles = StyleSheet.create({
   backContainer: {
     paddingTop: 7,
     paddingLeft: 20,
-    color: "white"
+    color: "white",
   },
   backIcon: {
     width: 35,
@@ -142,50 +148,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "lightpink",
   },
-  titleContent: {
-    flex: 1,
-    height: "100%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    backgroundColor: "lightblue",
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    padding: 15,
-    borderRadius: 30,
-  },
-  detailContent: {
-    flex: 1,
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    display: "flex",
-    flexDirection: "column",
-    gap: 20,
-  },
-  detailContentDescription: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "lightyellow",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    padding: 15,
-    borderRadius: 30,
-  },
-  detailContentStats: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "lightgreen",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    padding: 15,
-    borderRadius: 30,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
   },
   description: {
     fontSize: 16,
+  },
+  body: {
+    flex: 8, // Ensures the container takes up the full available space
+    flexDirection: "row", // Arranges children side by side
+    width: "100%", // Ensures the container spans the full screen width
+    gap: 10,
+    padding: 15,
+  },
+  child1: {
+    flex: 1,
+    width: "50%", // Explicitly ensures equal width
+    backgroundColor: "lightblue",
+    borderRadius: 30,
+  },
+  child2: {
+    flex: 1,
+    width: "50%", // Explicitly ensures equal width
+    gap: 10,
+  },
+  grandchild1: {
+    height: "50%",
+    backgroundColor: "lightyellow",
+    borderRadius: 30,
+  },
+  grandchild2: {
+    height: "50%",
+    backgroundColor: "lightgreen",
+    borderRadius: 30,
+  },
+  text: {
+    padding: 15,
   },
 });
