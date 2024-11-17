@@ -14,10 +14,12 @@ import {
   ProjectLocation,
   Location,
   LocationTracking,
+  UserLocation,
 } from "../lib/types";
 import {
   HOMESCREEN_DISPLAY_OPTIONS,
   LOCATION_TRIGGER_OPTIONS,
+  SCORING_OPTIONS,
 } from "../lib/constants";
 import { useUser } from "./UserContext";
 import { useProjectData } from "../hooks/useProjectData";
@@ -69,6 +71,9 @@ export function ProjectProvider({
     locationTrackingQuery,
     setLocationVisitedMutation,
   } = useProjectData(Number(projectId), username || "");
+
+  // Check if the useEffect to get userLocation has run at least once
+  const [hasRunOnce, setHasRunOnce] = useState(false);
 
   // GET LOCATIONS DATA
   const allLocations = locationQuery.data;
@@ -133,9 +138,6 @@ export function ProjectProvider({
     locationScored: boolean
   ) => {
     // Extract location content for the new location
-    // const locationContent = locationQuery.data?.find(
-    //   (loc) => loc.id === location.id
-    // );
     setLocationVisited({
       newLocationVisited: true,
       newLocation: location ?? ({} as ProjectLocation),
@@ -161,7 +163,6 @@ export function ProjectProvider({
 
   // Keep track of the geographical info of the user and project
   // Request the user for location permission when initialised
-  const locationPermission = useLocationPermission();
 
   const initialMapState = {
     locations: [],
@@ -187,22 +188,25 @@ export function ProjectProvider({
 
   const [mapState, setMapState] = useState<MapState>(initialMapState);
 
+  const locationPermission = useLocationPermission(setMapState);
+
   // Update user location and nearest location
   useEffect(() => {
     let locationSubscription: ExpoLocation.LocationSubscription | null = null;
 
     // Ensure location permission and locations data are available
-    if (locationPermission && updatedLocations.length > 0) {
+    if (locationPermission && (!hasRunOnce || updatedLocations.length > 0)) {
       (async () => {
+        console.log("\n\nSUBSCRIPTION\n\n");
         // Start watching the user's position
         locationSubscription = await ExpoLocation.watchPositionAsync(
           {
-            accuracy: ExpoLocation.Accuracy.High,
+            accuracy: ExpoLocation.Accuracy.Balanced,
             distanceInterval: 10, // in meters
             timeInterval: 5000, // in milliseconds
           },
           (location) => {
-            const updatedUserLocation = {
+            const updatedUserLocation: UserLocation = {
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
               longitudeDelta: mapState.userLocation.longitudeDelta,
@@ -214,16 +218,37 @@ export function ProjectProvider({
               updatedLocations
             );
 
-            setMapState((prevState) => ({
-              ...prevState,
-              userLocation: updatedUserLocation,
-              nearbyLocation: updatedNearbyLocation,
-            }));
+            console.log("Calculating nearby again");
 
-            console.log("User location updated", updatedUserLocation);
-            console.log("Nearby location updated", updatedNearbyLocation);
+            // Only update the mapState when the locations change
+            if (
+              !(
+                mapState.nearbyLocation === updatedNearbyLocation &&
+                mapState.userLocation === updatedUserLocation
+              )
+            ) {
+              console.log(
+                `Nearby Location: \n old: ${mapState.nearbyLocation.coordinates.latitude}, ${mapState.nearbyLocation.coordinates.longitude} \n new: ${updatedNearbyLocation.coordinates.latitude}, ${updatedNearbyLocation.coordinates.longitude}`
+              );
+              console.log(
+                `User Location: \n old: ${mapState.userLocation.latitude}, ${mapState.userLocation.longitude} \n new: ${updatedUserLocation.latitude}, ${updatedUserLocation.longitude}`
+              );
+
+              setMapState((prevState) => ({
+                ...prevState,
+                userLocation: updatedUserLocation,
+                nearbyLocation: updatedNearbyLocation,
+              }));
+
+              console.log(
+                `Locations updated: userLocation - ${mapState.userLocation.latitude}, ${mapState.userLocation.longitude}, nearbyLocation - ${mapState.nearbyLocation.coordinates.latitude}, ${mapState.nearbyLocation.coordinates.longitude}`
+              );
+            }
           }
         );
+
+        // Ensure the effect is run at least once
+        setHasRunOnce(true);
       })();
     }
 
@@ -247,17 +272,18 @@ export function ProjectProvider({
         )
       ) {
         console.log("Location not visited yet!");
+
         // Mark location as visited
         const locationToVisit = allLocations?.find((location) => {
           return location.id === mapState.nearbyLocation.id;
         });
+
         if (locationToVisit) {
-          // Check if location can be scored by location trigger
+          // Check if project allows scoring by visiting location
           const locationScored =
-            locationToVisit.location_trigger ===
-              LOCATION_TRIGGER_OPTIONS.locationEntry ||
-            locationToVisit.location_trigger ===
-              LOCATION_TRIGGER_OPTIONS.LocationEntryAndQRCode;
+            projectQuery.data?.[0].participant_scoring ===
+            SCORING_OPTIONS.locations;
+
           locationOverlay.setNewLocationVisited(
             locationToVisit,
             locationScored

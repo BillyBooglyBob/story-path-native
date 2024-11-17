@@ -21,9 +21,6 @@ export default function MapScreen() {
     );
   }
 
-  console.log("Map State: ", mapState);
-  console.log("Current locations: ", updatedLocations)
-
   return (
     <>
       <MapView

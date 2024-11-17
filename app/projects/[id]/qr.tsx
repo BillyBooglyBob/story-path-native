@@ -9,7 +9,10 @@ import {
 } from "react-native";
 import { useProject } from "../../../context/ProjectContext";
 import LocationPopUp from "../../../components/LocationPopUp";
-import { LOCATION_TRIGGER_OPTIONS } from "../../../lib/constants";
+import {
+  LOCATION_TRIGGER_OPTIONS,
+  SCORING_OPTIONS,
+} from "../../../lib/constants";
 
 export default function QRScreen() {
   // States to store permission of QR data
@@ -21,7 +24,7 @@ export default function QRScreen() {
 
   // Get location data from the project context
   const projectContext = useProject();
-  const { allLocations, visitedLocations, locationOverlay } =
+  const { allLocations, visitedLocations, locationOverlay, project } =
     projectContext || {};
 
   // Handle when barcode is scanned
@@ -43,11 +46,9 @@ export default function QRScreen() {
       (location) => location.id === locationIdNumber
     );
 
-    // Check if location allows scoring by qr code
+    // Check if project allows scoring by qr code
     const locationScored =
-      location?.location_trigger ===
-        LOCATION_TRIGGER_OPTIONS.LocationEntryAndQRCode ||
-      location?.location_trigger === LOCATION_TRIGGER_OPTIONS.QRCode;
+      project?.participant_scoring === SCORING_OPTIONS.QRCodes;
 
     visitedAlready
       ? location &&
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   message: {
     textAlign: "center",
     paddingBottom: 10,
-    color: "white"
+    color: "white",
   },
   camera: {
     flex: 1,

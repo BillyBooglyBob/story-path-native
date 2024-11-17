@@ -8,7 +8,10 @@ import {
   View,
 } from "react-native";
 import { useProject } from "../../../context/ProjectContext";
-import { SCORING_OPTIONS } from "../../../lib/constants";
+import {
+  HOMESCREEN_DISPLAY_OPTIONS,
+  SCORING_OPTIONS,
+} from "../../../lib/constants";
 import LocationPopUp from "../../../components/LocationPopUp";
 
 export default function ProjectDetailsScreen() {
@@ -17,8 +20,6 @@ export default function ProjectDetailsScreen() {
     project,
     allLocations,
     visitedLocations,
-    locationStatus,
-    locationError,
     locationOverlay,
     userScore,
   } = projectContext || {};
@@ -27,6 +28,16 @@ export default function ProjectDetailsScreen() {
     allLocations?.reduce((acc, location) => {
       return acc + location.score_points;
     }, 0) ?? 0;
+
+  const scoringMessages = {
+    [SCORING_OPTIONS.QRCodes]: "Score via scanning QR codes only",
+    [SCORING_OPTIONS.locations]: "Score via visiting locations only",
+    [SCORING_OPTIONS.notScored]: "Not scored",
+  };
+
+  const scoringOption =
+    scoringMessages[project?.participant_scoring ?? "Not Scored"] ||
+    "Not scored";
 
   return (
     <SafeAreaView style={styles.container}>
@@ -48,6 +59,19 @@ export default function ProjectDetailsScreen() {
           <View style={styles.text}>
             <Text style={styles.title}>Project Title</Text>
             <Text style={styles.description}>{project?.title}</Text>
+          </View>
+          <View style={styles.text}>
+            <Text style={styles.title}>Scoring Option</Text>
+            <Text style={styles.description}>{scoringOption}</Text>
+          </View>
+          <View style={styles.text}>
+            <Text style={styles.title}>Initial Display Mode</Text>
+            <Text style={styles.description}>
+              {project?.homescreen_display ===
+              HOMESCREEN_DISPLAY_OPTIONS.initialClue
+                ? "Display no locations on the map, need to discover them. Try starting with the initial clue."
+                : "Display all locations on the map."}
+            </Text>
           </View>
           <View style={styles.text}>
             <Text style={styles.title}>Description</Text>
@@ -85,7 +109,7 @@ export default function ProjectDetailsScreen() {
       </View>
 
       <View style={styles.footer}>
-        <View style={styles.locationContent}>
+        <ScrollView style={styles.locationContent}>
           <Text style={styles.title}>Visited Locations</Text>
           {visitedLocations?.length === 0 ? (
             <Text style={styles.description}>No locations visited yet</Text>
@@ -96,13 +120,7 @@ export default function ProjectDetailsScreen() {
               </Text>
             ))
           )}
-        </View>
-        {allLocations?.map((location) => (
-          <View>
-            <Text>{location.location_name}</Text>
-            <Text>{location.location_position}</Text>
-          </View>
-        ))}
+        </ScrollView>
       </View>
       {locationOverlay?.newLocationVisited.newLocationVisited && (
         <LocationPopUp />
@@ -114,8 +132,6 @@ export default function ProjectDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: "#202225",
   },
   header: {
@@ -123,14 +139,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "flex-start",
     alignSelf: "flex-start",
-  },
-  footer: {
-    flex: 4,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    padding: 20,
-    marginBottom: 5,
   },
   backContainer: {
     paddingTop: 7,
@@ -185,5 +193,12 @@ const styles = StyleSheet.create({
   },
   text: {
     padding: 15,
+  },
+  footer: {
+    flex: 3,
+    width: "100%",
+    height: "100%",
+    padding: 20,
+    marginBottom: 5,
   },
 });
