@@ -16,6 +16,7 @@ export default function MapScreen() {
     mapState,
     locationOverlay,
     updatedLocations,
+    visibleLocations,
     userCenter,
   } = projectContext || {};
 
@@ -50,8 +51,8 @@ export default function MapScreen() {
           title="You are here"
           description="Your current location"
         />
-        {updatedLocations &&
-          updatedLocations.map((location) => (
+        {visibleLocations &&
+          visibleLocations.map((location) => (
             <Circle
               key={location.id}
               center={location.coordinates}

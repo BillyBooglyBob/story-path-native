@@ -171,6 +171,7 @@ export function calculateDistance(
     .sort((previousLocation, thisLocation) => {
       return previousLocation.distance.metres - thisLocation.distance.metres;
     });
+  
   return (
     nearestLocations.shift() || {
       id: 0,

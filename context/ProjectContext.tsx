@@ -32,6 +32,7 @@ type ProjectContextType = {
   projectError: Error | null;
   allLocations: ProjectLocation[] | undefined;
   visitedLocations: ProjectLocation[] | undefined;
+  visibleLocations: Location[];
   locationStatus: "error" | "success" | "pending";
   locationError: Error | null;
   mapState: MapState;
@@ -93,15 +94,12 @@ export function ProjectProvider({
 
   const visibleLocations = useMemo(() => {
     const project = projectQuery.data?.[0];
-    return project?.homescreen_display ===
-      HOMESCREEN_DISPLAY_OPTIONS.allLocations
-      ? allLocations
-      : visitedLocations;
-  }, [projectQuery.data, allLocations, visitedLocations]);
+    const visible =
+      project?.homescreen_display === HOMESCREEN_DISPLAY_OPTIONS.allLocations
+        ? allLocations
+        : visitedLocations;
 
-  // Convert location from string format into format usable by the map
-  const updatedLocations: Location[] = useMemo(() => {
-    return (visibleLocations ?? []).map((location) => {
+    return (visible ?? []).map((location) => {
       const [x, y] = location.location_position
         .replace(/[()]/g, "")
         .split(",")
@@ -120,7 +118,30 @@ export function ProjectProvider({
         },
       };
     });
-  }, [visibleLocations]);
+  }, [projectQuery.data, allLocations, visitedLocations]);
+
+  // Convert location from string format into format usable by the map
+  const updatedLocations: Location[] = useMemo(() => {
+    return (allLocations ?? []).map((location) => {
+      const [x, y] = location.location_position
+        .replace(/[()]/g, "")
+        .split(",")
+        .map(Number);
+
+      return {
+        coordinates: {
+          latitude: x,
+          longitude: y,
+        },
+        id: location.id ?? 0,
+        location: location.location_name,
+        distance: {
+          metres: 0,
+          nearby: false,
+        },
+      };
+    });
+  }, [allLocations]);
 
   // Create additional state to manage location tracking and
   // set locationVisit to true, so it overlays over the entire screen
@@ -313,6 +334,7 @@ export function ProjectProvider({
     projectError: projectQuery.error,
     allLocations: locationQuery.data,
     visitedLocations,
+    visibleLocations,
     locationStatus: locationQuery.status,
     locationError: locationQuery.error,
     userCenter: center,

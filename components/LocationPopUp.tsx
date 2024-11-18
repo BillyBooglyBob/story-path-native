@@ -27,6 +27,8 @@ const LocationPopUp = () => {
           <Text style={styles.overlayText}>
             {locationContent.location_name}
           </Text>
+          <Text style={styles.overlayTextTitle}>Clue to next location</Text>
+          <Text style={styles.overlayText}>{locationContent.clue}</Text>
           <Text style={styles.overlayTextTitle}>Location coordinates</Text>
           <Text style={styles.overlayText}>
             {locationContent.location_position}
