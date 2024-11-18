@@ -11,7 +11,13 @@ export default function MapScreen() {
   // Setup state for map data
   // Retrieve user's current location
   const projectContext = useProject();
-  const { locationPermission, mapState, locationOverlay, updatedLocations } = projectContext || {};
+  const {
+    locationPermission,
+    mapState,
+    locationOverlay,
+    updatedLocations,
+    userCenter,
+  } = projectContext || {};
 
   if (!locationPermission || !mapState) {
     return (
@@ -25,7 +31,7 @@ export default function MapScreen() {
     <>
       <MapView
         camera={{
-          center: mapState.userLocation,
+          center: userCenter ?? { latitude: 0, longitude: 0 },
           pitch: 0, // Angle of 3D map
           heading: 0, // Compass direction
           altitude: 3000, // Zoom level for iOS
@@ -44,24 +50,27 @@ export default function MapScreen() {
           title="You are here"
           description="Your current location"
         />
-        {updatedLocations && updatedLocations.map((location) => (
-          <Circle
-            key={location.id}
-            center={location.coordinates}
-            radius={100}
-            strokeWidth={3}
-            strokeColor="#A42DE8"
-            fillColor={
-              colorScheme == "dark"
-                ? "rgba(128,0,128,0.5)"
-                : "rgba(210,169,210,0.5)"
-            }
-          />
-        ))}
+        {updatedLocations &&
+          updatedLocations.map((location) => (
+            <Circle
+              key={location.id}
+              center={location.coordinates}
+              radius={100}
+              strokeWidth={3}
+              strokeColor="#A42DE8"
+              fillColor={
+                colorScheme == "dark"
+                  ? "rgba(128,0,128,0.5)"
+                  : "rgba(210,169,210,0.5)"
+              }
+            />
+          ))}
       </MapView>
       {/* If current nearby location is within 100m of user, will say so */}
       <NearbyLocation nearbyLocation={mapState.nearbyLocation} />
-      {locationOverlay?.newLocationVisited.newLocationVisited && <LocationPopUp />}
+      {locationOverlay?.newLocationVisited.newLocationVisited && (
+        <LocationPopUp />
+      )}
     </>
   );
 }
@@ -73,8 +82,8 @@ const styles = StyleSheet.create({
   },
   fallbackContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: colorScheme === "dark" ? "#1c1c1e" : "#f9f9f9",
   },
   fallbackText: {

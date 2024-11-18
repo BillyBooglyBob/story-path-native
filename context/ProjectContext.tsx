@@ -49,6 +49,7 @@ type ProjectContextType = {
     setLocationAlreadyVisited: () => void;
   };
   userScore: number;
+  userCenter: UserLocation;
 };
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -71,9 +72,6 @@ export function ProjectProvider({
     locationTrackingQuery,
     setLocationVisitedMutation,
   } = useProjectData(Number(projectId), username || "");
-
-  // Check if the useEffect to get userLocation has run at least once
-  const [hasRunOnce, setHasRunOnce] = useState(false);
 
   // GET LOCATIONS DATA
   const allLocations = locationQuery.data;
@@ -188,6 +186,26 @@ export function ProjectProvider({
 
   const [mapState, setMapState] = useState<MapState>(initialMapState);
 
+  // Convert the user location to a truncated decimal
+  const truncateDecimal = (loc: UserLocation) => {
+    const reduceDecimal = (num: number) => {
+      return Math.trunc(num * 100) / 100;
+    };
+
+    const result = {
+      latitude: reduceDecimal(loc.latitude),
+      longitude: reduceDecimal(loc.longitude),
+      latitudeDelta: loc.latitudeDelta,
+      longitudeDelta: loc.longitudeDelta,
+    };
+
+    return result;
+  };
+
+  // Set the center of the map to the user's location
+  // Used to ensure the center is not constantly changing
+  const [center, setCenter] = useState(truncateDecimal(mapState.userLocation));
+
   const locationPermission = useLocationPermission(setMapState);
 
   // Update user location and nearest location
@@ -195,9 +213,8 @@ export function ProjectProvider({
     let locationSubscription: ExpoLocation.LocationSubscription | null = null;
 
     // Ensure location permission and locations data are available
-    if (locationPermission && (!hasRunOnce || updatedLocations.length > 0)) {
+    if (locationPermission) {
       (async () => {
-        console.log("\n\nSUBSCRIPTION\n\n");
         // Start watching the user's position
         locationSubscription = await ExpoLocation.watchPositionAsync(
           {
@@ -218,8 +235,6 @@ export function ProjectProvider({
               updatedLocations
             );
 
-            console.log("Calculating nearby again");
-
             // Only update the mapState when the locations change
             if (
               !(
@@ -227,28 +242,14 @@ export function ProjectProvider({
                 mapState.userLocation === updatedUserLocation
               )
             ) {
-              console.log(
-                `Nearby Location: \n old: ${mapState.nearbyLocation.coordinates.latitude}, ${mapState.nearbyLocation.coordinates.longitude} \n new: ${updatedNearbyLocation.coordinates.latitude}, ${updatedNearbyLocation.coordinates.longitude}`
-              );
-              console.log(
-                `User Location: \n old: ${mapState.userLocation.latitude}, ${mapState.userLocation.longitude} \n new: ${updatedUserLocation.latitude}, ${updatedUserLocation.longitude}`
-              );
-
               setMapState((prevState) => ({
                 ...prevState,
                 userLocation: updatedUserLocation,
                 nearbyLocation: updatedNearbyLocation,
               }));
-
-              console.log(
-                `Locations updated: userLocation - ${mapState.userLocation.latitude}, ${mapState.userLocation.longitude}, nearbyLocation - ${mapState.nearbyLocation.coordinates.latitude}, ${mapState.nearbyLocation.coordinates.longitude}`
-              );
             }
           }
         );
-
-        // Ensure the effect is run at least once
-        setHasRunOnce(true);
       })();
     }
 
@@ -293,6 +294,18 @@ export function ProjectProvider({
     }
   }, [mapState.nearbyLocation, mapState.userLocation, updatedLocations]);
 
+  // Modify the center of the map only when user's location actually changes
+  useEffect(() => {
+    const newUserLocation = truncateDecimal(mapState.userLocation);
+    if (
+      center.latitude !== newUserLocation.latitude ||
+      center.longitude !== newUserLocation.longitude
+    ) {
+      console.log("Setting center to", newUserLocation);
+      setCenter(newUserLocation);
+    }
+  }, [mapState.userLocation]);
+
   // Pass both project and locations data along with their status/error info
   const contextValue = {
     project: projectQuery.data?.[0],
@@ -302,6 +315,7 @@ export function ProjectProvider({
     visitedLocations,
     locationStatus: locationQuery.status,
     locationError: locationQuery.error,
+    userCenter: center,
     userScore,
     mapState,
     updatedLocations,
