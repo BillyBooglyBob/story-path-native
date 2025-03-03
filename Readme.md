@@ -1,42 +1,65 @@
-StoryPath is a location experience platform designed to allow users to create and explore virtual museum exhibits, location-based tours, and treasure hunts with clues.
+# 📍 StoryPath - Location Experience Platform  
 
-The platform features a Web app built in React that enables users to author these experiences, and a React Native Player for deploying them, making it easy to bring location-driven narratives to life.
+🔗 **Live Demo:** [StoryPath Demo](https://link-to-demo.com)  
 
-On the React Native Playe the user can select a location based experience (project) made on the Web app and go through the experience. Depending on the project type, can either score by scanning QR codes generated using the Web app or by visiting the location in person. Both will trigger a location pop-up showing the location content set.
+## ✨ Overview  
+StoryPath is a **location-based experience platform** that allows users to create and explore virtual museum exhibits, location-driven tours, and treasure hunts with clues. The platform includes:  
 
-This project is the React Native Player.
+- A **Web app** built in React for authorship of experiences.  
+- A **React Native Player** for users to deploy and experience the location-based projects.  
 
-To run, do the following:
-- clone the project
-- run "npm install"
-- run "npm run start"
-- open the app by using the expo app or a simulator through Android Studio
+Users can choose from various location-based experiences (projects) created on the Web app and explore them via the React Native Player. Depending on the project, users can **scan QR codes** or **visit locations in person** to trigger pop-ups showing location-specific content.  
 
-Here's the app demo images:
-- Home Page
-<img width="236" alt="Home page" src="https://github.com/user-attachments/assets/79bfbf8a-a279-4573-8ac5-e6724dfe60e5">
+## 🚀 Key Features  
+- **Location-Based Experiences** – Create immersive, interactive tours, exhibits, and treasure hunts.  
+- **QR Code Scanning & Location Integration** – Users can interact with experiences by scanning QR codes or visiting real-world locations.  
+- **Cross-Platform** – A Web app for experience creation and a React Native app for exploring experiences.  
+- **Location Pop-Ups** – Rich content triggered by location-based actions.  
 
-- Profile Page
-<img width="216" alt="Profile" src="https://github.com/user-attachments/assets/2e54fe39-dd2e-4391-b452-9d976d612524">
+---
 
-- About Page
-<img width="234" alt="About page" src="https://github.com/user-attachments/assets/162e286d-eac8-4a8b-afa0-582529d9e3e3">
+## 🛠 Tech Stack  
+- **Frontend (Web App):** React  
+- **Mobile (Player):** React Native  
+- **Backend:** Node.js (for backend logic, if applicable)  
+- **QR Code Scanning:** Integrated QR scanning functionality  
 
-- Projects Page
-<img width="235" alt="Projects page" src="https://github.com/user-attachments/assets/18e0aa56-eab4-4d15-89e1-a49e8cc3c2cf">
+---
 
-- Dashboard
-<img width="216" alt="Dashbaord" src="https://github.com/user-attachments/assets/020e9d89-b0ae-401b-be11-8b0a4de477a8">
+## 📸 Screenshots  
+### 🔹 Home Page  
+![Home Page](https://github.com/user-attachments/assets/79bfbf8a-a279-4573-8ac5-e6724dfe60e5)  
 
-- Project Page
-<img width="230" alt="Preview page" src="https://github.com/user-attachments/assets/ab345822-74ee-4fa6-b274-0c13d439dfb9">
+### 🔹 Profile Page  
+![Profile Page](https://github.com/user-attachments/assets/2e54fe39-dd2e-4391-b452-9d976d612524)  
 
-- Map Page
-<img width="236" alt="Map Page" src="https://github.com/user-attachments/assets/dbc4d31c-776b-43c9-af1a-8bd0d20c13d2">
+### 🔹 About Page  
+![About Page](https://github.com/user-attachments/assets/162e286d-eac8-4a8b-afa0-582529d9e3e3)  
 
-- QR Code Scanner Page
-<img width="233" alt="QR Code Scanner Page" src="https://github.com/user-attachments/assets/4a2135f8-57d4-45ff-a67d-a32d0bd99627">
+### 🔹 Projects Page  
+![Projects Page](https://github.com/user-attachments/assets/18e0aa56-eab4-4d15-89e1-a49e8cc3c2cf)  
 
-- Location Pop Up
-<img width="235" alt="Location pop up" src="https://github.com/user-attachments/assets/f357e799-2864-4b3c-acef-f62ada84b948">
+### 🔹 Dashboard  
+![Dashboard](https://github.com/user-attachments/assets/020e9d89-b0ae-401b-be11-8b0a4de477a8)  
 
+### 🔹 Project Page  
+![Project Page](https://github.com/user-attachments/assets/ab345822-74ee-4fa6-b274-0c13d439dfb9)  
+
+### 🔹 Map Page  
+![Map Page](https://github.com/user-attachments/assets/dbc4d31c-776b-43c9-af1a-8bd0d20c13d2)  
+
+### 🔹 QR Code Scanner Page  
+![QR Code Scanner](https://github.com/user-attachments/assets/4a2135f8-57d4-45ff-a67d-a32d0bd99627)  
+
+### 🔹 Location Pop-Up  
+![Location Pop-Up](https://github.com/user-attachments/assets/f357e799-2864-4b3c-acef-f62ada84b948)  
+
+---
+
+## 🏗 Installation & Setup  
+To run the project locally:  
+
+### 1️⃣ Clone the Repository  
+```bash
+git clone https://github.com/BillyBooglyBob/story-path-native.git
+cd story-path-native
