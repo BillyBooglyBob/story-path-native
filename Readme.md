@@ -1,6 +1,6 @@
 # 📍 StoryPath - Location Experience Platform  
 
-🔗 **Live Demo:** [Story Path Website](https://story-path-95otuls94-billybooglybobs-projects.vercel.app)
+🔗 **Live Demo:** [Website](https://story-path-web.vercel.app/)
 
 ## ✨ Overview  
 StoryPath is a **location-based experience platform** that allows users to create and explore virtual museum exhibits, location-driven tours, and treasure hunts with clues. The platform includes:  
